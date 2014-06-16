@@ -1,0 +1,12 @@
+*.DS_Store
+
+# Compile temp files and target
+target
+*.swp
+*.swo
+*.iml
+.lib
+
+# IntelliJ files
+.idea
+.idea_modules
