@@ -1,7 +1,6 @@
 package twitter
 
 import twitter.conf.TwitterConfiguration
-import twitter.api.TimelinesResources
 import spray.http._
 import spray.client.pipelining._
 import akka.actor.ActorSystem
@@ -11,13 +10,19 @@ import spray.can.Http
 import auth.OAuth
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
+import spray.http.Uri.Query
+import spray.json.{JsValue, JsonParser}
+import scala.concurrent.Future
+import twitter.api.Timeline
 
 
-class Twitter(config: TwitterConfiguration) {
+class Twitter(config: TwitterConfiguration) extends Timeline {
 
-  implicit val system = ActorSystem()
-  import system.dispatcher // execution context for futures
-  implicit val timeout = Timeout(5, TimeUnit.SECONDS)
+  private[this] implicit val system = ActorSystem()
+  implicit val exec = system.dispatcher // execution context for futures
+  private[this] implicit val timeout = Timeout(5, TimeUnit.SECONDS)
+
+  private[this] def toJson: (HttpResponse => JsValue) = (r => JsonParser(r.entity.asString))
 
   private[this] val pipeline = for (
     Http.HostConnectorInfo(connector, _) <-
@@ -25,12 +30,13 @@ class Twitter(config: TwitterConfiguration) {
   ) yield (
       OAuth.oAuthAuthorizer(config)
       ~> sendReceive(connector)
+      ~> toJson
   )
 
-  def getUser = {
-    pipeline.flatMap(_(Get("/1.1/followers/ids.json"))) map { response =>
-      response.status
-    }
+  def apiget(path: String, params: Map[String, String]): Future[JsValue] = {
+    val uri = Uri.from(path = path, query = Query(params))
+    pipeline.flatMap(_(Get(uri)))
   }
+
 
 }
