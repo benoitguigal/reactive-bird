@@ -3,7 +3,7 @@ package twitter
 import org.joda.time.DateTime
 
 
-case class User(
+/*case class User(
     contributorsEnabled: Boolean,
     createdAt: DateTime,
     defaultProfile: Boolean,
@@ -43,4 +43,4 @@ case class User(
     utcOffset: Option[Int],
     verified: Boolean,
     withHeldInCountries: Option[String],
-    withHeldScope: Option[String])
+    withHeldScope: Option[String])*/

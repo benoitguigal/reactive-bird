@@ -3,7 +3,7 @@ package twitter
 import org.joda.time.DateTime
 
 
-case class Status(
+/*case class Status(
     contributors: Seq[User],
     coordinates: Coordinates,
     createdAt: DateTime,
@@ -32,8 +32,7 @@ case class Status(
     user: User,
     withheldCopyright: Option[Boolean],
     withheldInCountries: Seq[String],
-    withheldScope: Option[String])
-
+    withheldScope: Option[String])*/
 
 case class Coordinates(longitude: Double, latitude: Double)
 
