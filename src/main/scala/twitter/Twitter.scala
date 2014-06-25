@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit
 import spray.http.Uri.Query
 import scala.concurrent.Future
 import twitter.api.Timeline
+import TwitterError.errorFilter
 
 
 class Twitter(config: TwitterConfiguration) extends Timeline {
@@ -27,7 +28,9 @@ class Twitter(config: TwitterConfiguration) extends Timeline {
   ) yield (
       OAuth.oAuthAuthorizer(config)
       ~> sendReceive(connector)
+      ~> errorFilter
   )
+
 
   def get(path: String, params: Map[String, String]): Future[HttpResponse] = {
     val uri = Uri.from(path = path, query = Query(params))
