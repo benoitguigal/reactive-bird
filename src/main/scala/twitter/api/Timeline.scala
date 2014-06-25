@@ -5,6 +5,7 @@ import spray.json.JsonParser
 import scala.concurrent.Future
 import twitter.models.Status
 import twitter.models.JsonFormats._
+import twitter.version
 
 trait Timeline {
   self: Twitter =>
@@ -26,7 +27,7 @@ trait Timeline {
         includeEntities map ("include_entities" -> _.toString)
     ).flatten.toMap
 
-    get("/1.1/statuses/mentions_timeline.json", params) map { r =>
+    get(s"/$version/statuses/mentions_timeline.json", params) map { r =>
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
   }
@@ -56,7 +57,7 @@ trait Timeline {
         includeRts map ("include_rts" -> _.toString)
     ).flatten.toMap
 
-    get("/1.1/statuses/user_timeline.json", params) map { r =>
+    get(s"/$version/statuses/user_timeline.json", params) map { r =>
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
 
@@ -81,7 +82,7 @@ trait Timeline {
         includeEntities map ("include_entities" -> _.toString)
     ).flatten.toMap
 
-    get("/1.1/statuses/home_timeline.json", params) map { r =>
+    get(s"/$version/statuses/home_timeline.json", params) map { r =>
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
 

@@ -23,7 +23,7 @@ class Twitter(config: TwitterConfiguration) extends Timeline {
 
   private[this] val pipeline = for (
     Http.HostConnectorInfo(connector, _) <-
-    IO(Http) ? Http.HostConnectorSetup("api.twitter.com", port = 443, sslEncryption = true)
+    IO(Http) ? Http.HostConnectorSetup(host, port = 443, sslEncryption = true)
   ) yield (
       OAuth.oAuthAuthorizer(config)
       ~> sendReceive(connector)

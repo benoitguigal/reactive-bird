@@ -8,14 +8,13 @@ import org.parboiled.common.Base64
 import scala.collection.immutable.TreeMap
 import java.net.URLEncoder
 import twitter.conf.TwitterConfiguration
+import twitter.{scheme, host}
 
 
 /**
  * taken from https://github.com/eigengo/activator-spray-twitter/edit/master/src/main/scala/core/OAuth.scala
  */
 object OAuth {
-
-  val baseurl = "https://api.twitter.com"
 
   def oAuthAuthorizer(config: TwitterConfiguration): HttpRequest ⇒ HttpRequest = {
     // construct the key and cryptographic entity
@@ -43,8 +42,7 @@ object OAuth {
 
       // construct parts of the signature base string
       val encodedOrderedParams = (TreeMap[String, String]() ++ oauthParams ++ requestParams) map { case (k, v) => k + "=" + v } mkString "&"
-      val url = baseurl + httpRequest.uri.toString().split('?')(0)
-      print(url)
+      val url = scheme + "://"+ host + httpRequest.uri.toString().split('?')(0)
       // construct the signature base string
       val signatureBaseString = percentEncode(httpRequest.method.toString() :: url :: encodedOrderedParams :: Nil)
 

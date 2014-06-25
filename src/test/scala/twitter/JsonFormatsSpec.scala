@@ -11,9 +11,9 @@ import twitter.models.Hashtag
 import org.joda.time.DateTime
 
 
-class MyJsonProtocolSpec extends FlatSpec with ShouldMatchers {
+class JsonFormatsSpec extends FlatSpec with ShouldMatchers {
 
-  import twitter.models.MyJsonProtocol._
+  import twitter.models.JsonFormats._
 
   it should "parse Coordinates from json" in {
     val source = "[-97.51087576,35.46500176]"
