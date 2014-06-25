@@ -14,15 +14,21 @@ import spray.http.Uri.Query
 import scala.concurrent.Future
 import twitter.api.Timeline
 import TwitterError.errorFilter
+import twitter.wrappers.{WrapperTypes, DefaultWrapperTypes}
 
 
-class Twitter(config: TwitterConfiguration) extends Timeline {
+object Twitter {
+
+  def apply(config: TwitterConfiguration) = new Twitter(config) with DefaultWrapperTypes
+}
+
+abstract class Twitter(val config: TwitterConfiguration) extends WrapperTypes with Timeline {
 
   private[this] implicit val system = ActorSystem()
   implicit val exec = system.dispatcher // execution context for futures
   private[this] implicit val timeout = Timeout(5, TimeUnit.SECONDS)
 
-  private[this] val pipeline = for (
+  private[this] lazy val pipeline = for (
     Http.HostConnectorInfo(connector, _) <-
     IO(Http) ? Http.HostConnectorSetup(host, port = 443, sslEncryption = true)
   ) yield (

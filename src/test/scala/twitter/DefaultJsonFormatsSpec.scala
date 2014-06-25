@@ -1,19 +1,14 @@
 package twitter
 
-import org.scalatest.FlatSpec
+import org.scalatest.{Matchers, FlatSpec}
 import spray.json.JsonParser
-import twitter.models._
-import org.scalatest.matchers.ShouldMatchers
-import twitter.models.Entities
-import twitter.models.Coordinates
-import twitter.models.Media
-import twitter.models.Hashtag
 import org.joda.time.DateTime
+import twitter.wrappers.defaults._
 
 
-class JsonFormatsSpec extends FlatSpec with ShouldMatchers {
+class DefaultJsonFormatsSpec extends FlatSpec with Matchers {
 
-  import twitter.models.JsonFormats._
+  import JsonFormats._
 
   it should "parse Coordinates from json" in {
     val source = "[-97.51087576,35.46500176]"
@@ -30,11 +25,6 @@ class JsonFormatsSpec extends FlatSpec with ShouldMatchers {
     hashtag should equal(Hashtag(Seq(32, 36), "lol"))
   }
 
-  it should "parse Seq[Hashtag] from json" in {
-    val source = """[{"indices":[32,36],"text":"lol"}]"""
-    val json = JsonParser(source)
-    val hashtags = json.convertTo[Seq[Hashtag]]
-  }
 
   it should "parse Media from json" in {
     val source =

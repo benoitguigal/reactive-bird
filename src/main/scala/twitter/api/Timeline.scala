@@ -3,8 +3,6 @@ package twitter.api
 import twitter.Twitter
 import spray.json.JsonParser
 import scala.concurrent.Future
-import twitter.models.Status
-import twitter.models.JsonFormats._
 import twitter.version
 
 trait Timeline {

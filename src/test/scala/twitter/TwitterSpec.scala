@@ -15,7 +15,7 @@ class TwitterSpec extends FlatSpec {
       "6fHodhXT9TbCdkFQTtgtLC6EGTiS6ubbuaewxK5Ojl7jAm1bnF",
       "386499416-JpWsuKp4JfNVGtLwZpINcEpdYIWwB8sJdRpRmxHB",
       "IBdQXGAXRLEaw6gyrqRt6CZv6STBUSVhgzcOpZtks4ndL")
-    val twitter = new Twitter(twitterConfig)
+    val twitter = Twitter(twitterConfig)
     val mentions = Await.result(twitter.mentionsTimeline(), Duration(5, TimeUnit.SECONDS))
     println(mentions)
   }

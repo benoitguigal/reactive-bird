@@ -1,4 +1,4 @@
-package twitter.models
+package twitter.wrappers.defaults
 
 import spray.json._
 import org.joda.time.DateTime
@@ -7,7 +7,6 @@ import java.util.Locale
 
 
 object JsonFormats extends DefaultJsonProtocol {
-
 
   implicit object CoordinatesJsonFormat extends JsonFormat[Coordinates] {
 
@@ -48,9 +47,4 @@ object JsonFormats extends DefaultJsonProtocol {
   implicit val placeFormat = jsonFormat7(Place)
 
 }
-
-
-
-
-
 
