@@ -6,7 +6,7 @@ import org.joda.time.format.DateTimeFormat
 import java.util.Locale
 
 
-object MyJsonProtocol extends DefaultJsonProtocol {
+object JsonFormats extends DefaultJsonProtocol {
 
 
   implicit object CoordinatesJsonFormat extends JsonFormat[Coordinates] {
@@ -48,6 +48,8 @@ object MyJsonProtocol extends DefaultJsonProtocol {
   implicit val placeFormat = jsonFormat7(Place)
 
 }
+
+
 
 
 

@@ -11,7 +11,6 @@ import auth.OAuth
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import spray.http.Uri.Query
-import spray.json.{JsValue, JsonParser}
 import scala.concurrent.Future
 import twitter.api.Timeline
 
@@ -22,18 +21,15 @@ class Twitter(config: TwitterConfiguration) extends Timeline {
   implicit val exec = system.dispatcher // execution context for futures
   private[this] implicit val timeout = Timeout(5, TimeUnit.SECONDS)
 
-  private[this] def toJson: (HttpResponse => JsValue) = (r => JsonParser(r.entity.asString))
-
   private[this] val pipeline = for (
     Http.HostConnectorInfo(connector, _) <-
     IO(Http) ? Http.HostConnectorSetup("api.twitter.com", port = 443, sslEncryption = true)
   ) yield (
       OAuth.oAuthAuthorizer(config)
       ~> sendReceive(connector)
-      ~> toJson
   )
 
-  def apiget(path: String, params: Map[String, String]): Future[JsValue] = {
+  def get(path: String, params: Map[String, String]): Future[HttpResponse] = {
     val uri = Uri.from(path = path, query = Query(params))
     pipeline.flatMap(_(Get(uri)))
   }
