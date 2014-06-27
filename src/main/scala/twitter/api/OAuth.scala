@@ -11,9 +11,9 @@ trait OAuth {
   val requestTokenR = "oauth_token=(.+)&=oauth_token=(.+)".r
   case class RequestToken(oauthToken: String, oauthTokenSecret: String)
 
-  def requestToken: Future[RequestToken] = {
+  def requestToken(callbackUrl: String): Future[RequestToken] = {
 
-    post("/oauth/request_token", Map()) map { response =>
+    post("/oauth/request_token", Map("callback_url" -> callbackUrl)) map { response =>
       response.entity.asString match {
         case requestTokenR(token, secret) => RequestToken(token, secret)
         case _ => throw new Exception("Failed parsing request token")
