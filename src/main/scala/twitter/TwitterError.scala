@@ -14,8 +14,11 @@ object TwitterError {
 
   def errorFilter: ResponseTransformer = {
     response => {
-      if (response.status.intValue == 200)
+      if (response.status.intValue == 200) {
+        println("200 mother fucker !!!!")
+        println(response.entity)
         response
+      }
       else {
         val json = JsonParser(response.entity.asString)
         json.asJsObject.getFields("errors") match {

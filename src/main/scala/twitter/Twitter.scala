@@ -11,7 +11,7 @@ import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import spray.http.Uri.Query
 import scala.concurrent.Future
-import twitter.api.Timeline
+import twitter.api.{ApiOauth, Timeline}
 import TwitterError.errorFilter
 import twitter.wrappers.{WrapperTypes, DefaultWrapperTypes}
 
@@ -21,7 +21,7 @@ object Twitter {
   def apply(consumer: Consumer) = new Twitter(consumer) with DefaultWrapperTypes
 }
 
-abstract class Twitter(val consumer: Consumer) extends WrapperTypes with Timeline {
+abstract class Twitter(val consumer: Consumer) extends WrapperTypes with Timeline with ApiOauth {
 
   private[this] implicit val system = ActorSystem()
   implicit val exec = system.dispatcher // execution context for futures
