@@ -15,19 +15,22 @@ object TwitterError {
   def errorFilter: ResponseTransformer = {
     response => {
       if (response.status.intValue == 200) {
-        println("200 mother fucker !!!!")
-        println(response.entity)
         response
       }
       else {
-        val json = JsonParser(response.entity.asString)
-        json.asJsObject.getFields("errors") match {
-          case Seq(JsArray(errors)) if (errors.size >=1) =>
-            val fields = errors(0).asJsObject.fields
-            val JsString(message) = fields.get("message").get
-            val JsNumber(code) = fields.get("code").get
-            throw TwitterError(code.toInt, message)
-          case _ => response
+        ///TODO handle message parsing by checking Content-Type header
+        try {
+          val json = JsonParser(response.entity.asString)
+          json.asJsObject.getFields("errors") match {
+            case Seq(JsArray(errors)) if (errors.size >=1) =>
+              val fields = errors(0).asJsObject.fields
+              val JsString(message) = fields.get("message").get
+              val JsNumber(code) = fields.get("code").get
+              throw TwitterError(code.toInt, message)
+            case _ => response
+          }
+        } catch {
+          case e: Throwable => throw new Exception()
         }
       }
     }

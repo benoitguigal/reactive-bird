@@ -6,14 +6,16 @@ import akka.actor.ActorSystem
 import akka.io.IO
 import akka.pattern.ask
 import spray.can.Http
-import twitter.oauth.{Token, Consumer, OAuth}
+import twitter.oauth.{RequestToken, Token, Consumer, OAuth}
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import spray.http.Uri.Query
 import scala.concurrent.Future
-import twitter.api.{ApiOauth, Timeline}
+import twitter.api.Timeline
 import TwitterError.errorFilter
 import twitter.wrappers.{WrapperTypes, DefaultWrapperTypes}
+import OAuth.CanBeAuthorizedHttpRequest
+
 
 
 object Twitter {
@@ -21,7 +23,7 @@ object Twitter {
   def apply(consumer: Consumer) = new Twitter(consumer) with DefaultWrapperTypes
 }
 
-abstract class Twitter(val consumer: Consumer) extends WrapperTypes with Timeline with ApiOauth {
+abstract class Twitter(val consumer: Consumer) extends WrapperTypes with Timeline {
 
   private[this] implicit val system = ActorSystem()
   implicit val exec = system.dispatcher // execution context for futures
@@ -38,33 +40,24 @@ abstract class Twitter(val consumer: Consumer) extends WrapperTypes with Timelin
       ~> errorFilter
   )
 
-
   def get(token: Token, path: String, params: Map[String, String]): Future[HttpResponse] = {
     val uri = Uri.from(path = path, query = Query(params))
-    val authorizer = OAuth.oAuthAuthorizer(consumer, Some(token))
-    val request = authorizer(Get(uri))
+    val request = Get(uri).authorize(consumer, token)
     pipeline.flatMap(_(request))
   }
 
   def post(token: Token, path: String, params: Map[String, String]): Future[HttpResponse] = {
     val uri = Uri.from(path = path, query = Query(params))
-    val authorizer = OAuth.oAuthAuthorizer(consumer, Some(token))
-    val request = authorizer(Post(uri))
+    val request = Post(uri).authorize(consumer, token)
     pipeline.flatMap(_(request))
   }
 
-  def get(path: String, params: Map[String, String]): Future[HttpResponse] = {
-    val uri = Uri.from(path = path, query = Query(params))
-    val authorizer = OAuth.oAuthAuthorizer(consumer, None)
-    val request = authorizer(Get(uri))
-    pipeline.flatMap(_(request))
-  }
-
-  def post(path: String, params: Map[String, String]): Future[HttpResponse] = {
-    val uri = Uri.from(path = path, query = Query(params))
-    val authorizer = OAuth.oAuthAuthorizer(consumer, None)
-    val request = authorizer(Post(uri))
-    pipeline.flatMap(_(request))
+  def requestToken(oauthCallback: String): Future[RequestToken] = {
+    val uri = Uri.from(path = "/oauth/request_token")
+    val request = Post(uri).authorize(consumer, oauthCallback)
+    pipeline.flatMap(_(request)) map { r =>
+      RequestToken.fromResponseBody(r.entity.asString)
+    }
   }
 
 }
