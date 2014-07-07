@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.io.IO
 import akka.pattern.ask
 import spray.can.Http
-import me.benoitguigal.twitter.oauth.{RequestToken, Token, Consumer, OAuth}
+import me.benoitguigal.twitter.oauth._
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import spray.http.Uri.Query
@@ -15,7 +15,10 @@ import me.benoitguigal.twitter.api.Timeline
 import TwitterError.errorFilter
 import me.benoitguigal.twitter.wrappers.{WrapperTypes, DefaultWrapperTypes}
 import OAuth.CanBeAuthorizedHttpRequest
-
+import spray.http.HttpRequest
+import me.benoitguigal.twitter.oauth.Token
+import me.benoitguigal.twitter.oauth.Consumer
+import spray.http.HttpResponse
 
 
 object Twitter {
@@ -48,7 +51,20 @@ abstract class Twitter(val consumer: Consumer) extends WrapperTypes with Timelin
 
   def post(token: Token, path: String, params: Map[String, String]): Future[HttpResponse] = {
     val uri = Uri.from(path = path, query = Query(params))
-    val request = Post(uri).authorize(consumer, token)
+    val request = {
+      val baseRequest = Post(uri)
+      val requestWithContent = if (params.nonEmpty) {
+        val urlEncodedParams = params map { case (k, v) => k + "=" + v } mkString "&"
+        val r = baseRequest.withHeadersAndEntity(
+            List(HttpHeaders.`Content-Type`(MediaTypes.`application/x-www-form-urlencoded`)),
+            HttpEntity(ContentType(MediaTypes.`application/x-www-form-urlencoded`), urlEncodedParams)
+        )
+        r.withHeaders(HttpHeaders.`Content-Length`(r.entity.data.length))
+      } else {
+        baseRequest
+      }
+      requestWithContent.authorize(consumer, token)
+    }
     pipeline.flatMap(_(request))
   }
 
@@ -57,6 +73,13 @@ abstract class Twitter(val consumer: Consumer) extends WrapperTypes with Timelin
     val request = Post(uri).authorize(consumer, oauthCallback)
     pipeline.flatMap(_(request)) map { r =>
       RequestToken.fromResponseBody(r.entity.asString)
+    }
+  }
+
+  def accessToken(oauthToken: String, oauthVerifier: String): Future[AccessToken] = {
+    val token = Token(oauthToken, None)
+    post(token, "/oauth/access_token", Map("oauth_verifier" -> oauthVerifier)) map { r =>
+      AccessToken.fromResponseBody(r.entity.asString)
     }
   }
 

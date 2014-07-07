@@ -38,7 +38,7 @@ object OAuth {
       val url = scheme + "://" + host + request.uri.path.toString()
 
       val signatureBase = %%(request.method.value) + "&" +  %%(url) + "&" + %%(encodedOrderedParams)
-      val signatureKey = %%(consumer.secret) + "&" + %%(token.secret)
+      val signatureKey = %%(consumer.secret) + "&" + token.secret.map(%%(_)).getOrElse("")
       val signature = HmacSha1Signature(signatureBase, signatureKey)
 
       val oauthBld = TreeMap.newBuilder[String, String]
