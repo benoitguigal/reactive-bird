@@ -2,15 +2,15 @@ package me.benoitguigal.twitter.api
 
 import spray.json.JsonParser
 import scala.concurrent.Future
-import me.benoitguigal.twitter.version
-import me.benoitguigal.twitter.oauth.Token
-import me.benoitguigal.twitter.Twitter
+import me.benoitguigal.twitter.{TwitterApi, version}
+
 
 trait Timeline {
-  self: Twitter =>
+  self: TwitterApi =>
+
+  import TwitterApi.exec
 
   def mentionsTimeline(
-      token: Token,
       count: Option[Int] = None,
       sinceId: Option[String] = None,
       maxId: Option[String] = None,
@@ -27,13 +27,12 @@ trait Timeline {
         includeEntities map ("include_entities" -> _.toString)
     ).flatten.toMap
 
-    get(token, s"/$version/statuses/mentions_timeline.json", params) map { r =>
+    get(s"/$version/statuses/mentions_timeline.json", params) map { r =>
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
   }
 
   def userTimeline(
-      token: Token,
       userId: Option[String] ,
       screeName: Option[String],
       sinceId: Option[String] = None,
@@ -58,14 +57,13 @@ trait Timeline {
         includeRts map ("include_rts" -> _.toString)
     ).flatten.toMap
 
-    get(token, s"/$version/statuses/user_timeline.json", params) map { r =>
+    get(s"/$version/statuses/user_timeline.json", params) map { r =>
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
 
   }
 
   def homeTimeline(
-      token: Token,
       count: Option[Int] = None,
       sinceId: Option[String] = None,
       maxId: Option[String] = None,
@@ -84,14 +82,13 @@ trait Timeline {
         includeEntities map ("include_entities" -> _.toString)
     ).flatten.toMap
 
-    get(token, s"/$version/statuses/home_timeline.json", params) map { r =>
+    get(s"/$version/statuses/home_timeline.json", params) map { r =>
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
 
   }
 
   def retweetsOfMe(
-      token: Token,
       count: Option[Int] = None,
       sinceId: Option[String] = None,
       maxId: Option[String] = None,
@@ -108,7 +105,7 @@ trait Timeline {
         includeUserEntities map ("include_user_entities" -> _.toString)
     ).flatten.toMap
 
-    get(token, "/1.1/statuses/retweets_of_me.json", params) map { r =>
+    get("/1.1/statuses/retweets_of_me.json", params) map { r =>
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
 

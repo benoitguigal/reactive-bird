@@ -15,24 +15,23 @@ class TwitterSpec extends FlatSpec {
   "Twitter" should "get a user mentions" in {
     pending
     val token = Token("386499416-JpWsuKp4JfNVGtLwZpINcEpdYIWwB8sJdRpRmxHB", Some("secret"))
-    val twitter = Twitter(consumer)
-    val mentions = Await.result(twitter.mentionsTimeline(token = token, count = Some(1)), Duration(5, TimeUnit.SECONDS))
+    val twitter = TwitterApi(consumer)
+    twitter.setToken(token)
+    val mentions = Await.result(twitter.mentionsTimeline(), Duration(5, TimeUnit.SECONDS))
     println(mentions)
   }
 
   "Twitter" should "get requestToken" in {
     pending
-    val twitter = Twitter(consumer)
+    val twitter = TwitterApi(consumer)
     val token = Await.result(twitter.requestToken("http://benoitguigal.me/oauth/callback"), Duration(5, TimeUnit.SECONDS))
     println(token)
   }
 
   "Twitter" should "get access token" in {
-    pending
-    val twitter = Twitter(consumer)
-    val token = Await.result(twitter.accessToken(
-      "KF47NBgodGIfdhjonAR7xzonb9f17RJouZt2umZirbk",
-      "secret"), Duration(5, TimeUnit.SECONDS))
+    val twitter = TwitterApi(consumer)
+    twitter.setToken(Token("emH9p0chQl2vF0e1fQpYTZnEFgWMWZShgW85omEwoA", None))
+    val token = Await.result(twitter.accessToken("secret"), Duration(5, TimeUnit.SECONDS))
     println(token)
   }
 

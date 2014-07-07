@@ -10,7 +10,6 @@ import me.benoitguigal.twitter.{scheme, host}
 
 object OAuth {
 
-
   implicit class CanBeAuthorizedHttpRequest(request: HttpRequest) {
 
     def authorize(consumer: Consumer, token: Token): HttpRequest = {

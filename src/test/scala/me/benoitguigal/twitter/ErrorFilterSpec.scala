@@ -4,7 +4,6 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.{Matchers, FunSpec}
 import spray.http.{HttpEntity, StatusCode, HttpResponse}
 import org.mockito.Mockito._
-import me.benoitguigal.twitter.TwitterError
 
 
 class ErrorFilterSpec extends FunSpec with MockitoSugar with Matchers {
