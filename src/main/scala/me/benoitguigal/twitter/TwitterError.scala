@@ -2,6 +2,7 @@ package me.benoitguigal.twitter
 
 import scala.annotation.switch
 import spray.json._
+import spray.http.{HttpHeaders, ContentTypes}
 
 
 abstract class TwitterError extends Exception {
@@ -18,8 +19,8 @@ object TwitterError {
         response
       }
       else {
-        ///TODO handle message parsing by checking Content-Type header
-        try {
+        val contentType = response.headers.collect { case HttpHeaders.`Content-Type`(ct) => ct }.head
+        if (contentType == ContentTypes.`application/json`) {
           val json = JsonParser(response.entity.asString)
           json.asJsObject.getFields("errors") match {
             case Seq(JsArray(errors)) if (errors.size >=1) =>
@@ -27,13 +28,18 @@ object TwitterError {
               val JsString(message) = fields.get("message").get
               val JsNumber(code) = fields.get("code").get
               throw TwitterError(code.toInt, message)
-            case _ => response
+            case _ => throw TwitterError(response.entity.asString)
           }
-        } catch {
-          case e: Throwable => throw new Exception()
+        }
+        else {
+          throw TwitterError(response.entity.asString)
         }
       }
     }
+  }
+
+  private def apply(_message: String) = new TwitterError {
+    override val message: String = _message
   }
 
   private def apply(code: Int, message: String): TwitterError = (code: @switch) match {

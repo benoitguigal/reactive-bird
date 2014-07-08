@@ -27,7 +27,7 @@ object TwitterApi {
 
 trait TwitterApi extends HttpService with WrapperTypes with Timeline with Oauth {
 
-  import TwitterApi.{system, exec, timeout}
+  import TwitterApi._
 
   val consumer: Consumer
   val oauthCallback: Option[String]
