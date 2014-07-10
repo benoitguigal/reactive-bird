@@ -65,3 +65,6 @@ val twitterApi = new TwitterApi with MyWrapperTypes {
    override val consumer = _consumer
 }
 ```
+
+### License
+Twitter-spray is free software licensed under the MIT/X11 license. Details provided in the LICENSE file.
