@@ -17,7 +17,8 @@ trait Oauth {
   }
 
   def accessToken(oauthVerifier: String): Future[AccessToken] = {
-    post("/oauth/access_token", Map("oauth_verifier" -> oauthVerifier)) map { r =>
+    val content = s"oauth_verifier=$oauthVerifier"
+    post("/oauth/access_token", Map(), Some(content)) map { r =>
       AccessToken.fromResponseBody(r.entity.asString)
     }
   }

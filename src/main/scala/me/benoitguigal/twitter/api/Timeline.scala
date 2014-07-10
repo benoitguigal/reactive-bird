@@ -33,8 +33,8 @@ trait Timeline {
   }
 
   def userTimeline(
-      userId: Option[String] ,
-      screeName: Option[String],
+      userId: Option[String] = None,
+      screenName: Option[String] = None,
       sinceId: Option[String] = None,
       count: Option[Int] = None,
       maxId: Option[String] = None,
@@ -43,11 +43,11 @@ trait Timeline {
       contributorDetails: Option[Boolean] = None,
       includeRts: Option[Boolean] = None): Future[Seq[Status]] = {
 
-    require(userId.isDefined || screeName.isDefined)
+    require(userId.isDefined || screenName.isDefined)
 
     val params = Seq(
         userId map ("user_id" -> _),
-        screeName map ("screen_name" -> _),
+        screenName map ("screen_name" -> _),
         sinceId map ("since_id" -> _),
         count map ("count" -> _.toString),
         maxId map ("max_id" -> _),
@@ -68,7 +68,7 @@ trait Timeline {
       sinceId: Option[String] = None,
       maxId: Option[String] = None,
       trimUser: Option[Boolean] = None,
-      excludeReplies: Option[Boolean],
+      excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
       includeEntities: Option[Boolean] = None): Future[Seq[Status]] = {
 
@@ -93,8 +93,8 @@ trait Timeline {
       sinceId: Option[String] = None,
       maxId: Option[String] = None,
       trimUser: Option[Boolean] = None,
-      includeEntities: Option[Boolean],
-      includeUserEntities: Option[Boolean]): Future[Seq[Status]] = {
+      includeEntities: Option[Boolean] = None,
+      includeUserEntities: Option[Boolean] = None): Future[Seq[Status]] = {
 
     val params = Seq(
         count map ("count" -> _.toString),

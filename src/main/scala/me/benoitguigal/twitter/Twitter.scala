@@ -1,15 +1,13 @@
 package me.benoitguigal.twitter
 
-import akka.pattern.ask
 import me.benoitguigal.twitter.oauth.Token
 import me.benoitguigal.twitter.oauth.Consumer
 import me.benoitguigal.twitter.http.{HttpPipeline, HttpService}
-import akka.actor.{Props, ActorSystem, Actor}
+import akka.actor.ActorSystem
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
-import me.benoitguigal.twitter.UserToken.{GetToken, SetToken}
 import me.benoitguigal.twitter.wrappers.{DefaultWrapperTypes, WrapperTypes}
-import me.benoitguigal.twitter.api.{Timeline, Oauth}
+import me.benoitguigal.twitter.api.{Tweets, Timeline, Oauth}
 
 
 object TwitterApi {
@@ -25,36 +23,18 @@ object TwitterApi {
 
 }
 
-trait TwitterApi extends HttpService with WrapperTypes with Timeline with Oauth {
-
-  import TwitterApi._
+trait TwitterApi extends HttpService with WrapperTypes with Timeline with Tweets with Oauth {
 
   val consumer: Consumer
   val oauthCallback: Option[String]
-  val userToken = system.actorOf(Props[UserToken], "UserToken")
+  var token: Option[Token] = None
 
-  override def pipeline = ask(userToken, GetToken).mapTo[Option[Token]] flatMap {
+  override def pipeline = token match {
     case Some(token) => HttpPipeline(consumer, token)
     case None => HttpPipeline(consumer, oauthCallback.getOrElse(""))
   }
 
-  def setToken(token: Token) = userToken ! SetToken(token)
-}
-
-
-object UserToken {
-  case class SetToken(token: Token)
-  case object GetToken
-}
-
-class UserToken extends Actor {
-
-  var token: Option[Token] = None
-
-  override def receive = {
-    case SetToken(t: Token) => token = Some(t)
-    case GetToken => sender ! token
-  }
-
+  def setToken(_token: Token) = { token = Some(_token) }
 
 }
+

@@ -10,3 +10,6 @@ target
 # IntelliJ files
 .idea
 .idea_modules
+
+# Inte test file
+src/test/scala/me/benoitguigal/twitter/TwitterSpec.scala
