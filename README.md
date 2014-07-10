@@ -35,7 +35,7 @@ val accessToken = twitterApi.accessToken("your-oauth-verifier")
 /// store accessToken and secret
 ```
 
-#### If you need to provide your own wrapper types around scala objects
+#### If you need to provide your own wrapper types around Twitter objects
 
 First define your own wrapper types
 ```
@@ -65,3 +65,6 @@ val twitterApi = new TwitterApi with MyWrapperTypes {
    override val consumer = _consumer
 }
 ```
+
+### License
+Twitter-spray is free software licensed under the MIT/X11 license. Details provided in the LICENSE file.
