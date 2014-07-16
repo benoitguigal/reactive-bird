@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import me.benoitguigal.twitter.wrappers.{DefaultWrapperTypes, WrapperTypes}
-import me.benoitguigal.twitter.api.{Tweets, Timeline, Oauth}
+import me.benoitguigal.twitter.api.{FriendsAndFollowers, Tweets, Timeline, Oauth}
 
 
 object TwitterApi {
@@ -23,7 +23,7 @@ object TwitterApi {
 
 }
 
-trait TwitterApi extends HttpService with WrapperTypes with Timeline with Tweets with Oauth {
+trait TwitterApi extends HttpService with WrapperTypes with Timeline with Tweets with FriendsAndFollowers with Oauth {
 
   val consumer: Consumer
   val oauthCallback: Option[String]

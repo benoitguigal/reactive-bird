@@ -105,7 +105,7 @@ trait Timeline {
         includeUserEntities map ("include_user_entities" -> _.toString)
     ).flatten.toMap
 
-    get("/1.1/statuses/retweets_of_me.json", params) map { r =>
+    get(s"/$version/statuses/retweets_of_me.json", params) map { r =>
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
 
