@@ -1,13 +1,14 @@
 package me.benoitguigal.twitter
 
-import me.benoitguigal.twitter.oauth.Token
-import me.benoitguigal.twitter.oauth.Consumer
 import me.benoitguigal.twitter.http.{HttpPipeline, HttpService}
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import me.benoitguigal.twitter.wrappers.{DefaultWrapperTypes, WrapperTypes}
-import me.benoitguigal.twitter.api.{FriendsAndFollowers, Tweets, Timeline, Oauth}
+import me.benoitguigal.twitter.api._
+import me.benoitguigal.twitter.oauth.Consumer
+import me.benoitguigal.twitter.oauth.Token
+import scala.Some
 
 
 object TwitterApi {
@@ -23,7 +24,14 @@ object TwitterApi {
 
 }
 
-trait TwitterApi extends HttpService with WrapperTypes with Timeline with Tweets with FriendsAndFollowers with Oauth {
+trait TwitterApi
+  extends HttpService
+  with WrapperTypes
+  with Timeline
+  with Tweets
+  with FriendsAndFollowers
+  with Users
+  with Oauth {
 
   val consumer: Consumer
   val oauthCallback: Option[String]
