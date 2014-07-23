@@ -10,7 +10,7 @@ trait Oauth {
 
   import TwitterApi.exec
 
-  def requestToken(oauthCallback: String): Future[RequestToken] = {
+  def requestToken: Future[RequestToken] = {
     post("/oauth/request_token", Map()) map { r =>
       RequestToken.fromResponseBody(r.entity.asString)
     }

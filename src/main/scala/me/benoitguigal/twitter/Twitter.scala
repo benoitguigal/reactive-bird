@@ -8,7 +8,6 @@ import me.benoitguigal.twitter.wrappers.{DefaultWrapperTypes, WrapperTypes}
 import me.benoitguigal.twitter.api._
 import me.benoitguigal.twitter.oauth.Consumer
 import me.benoitguigal.twitter.oauth.Token
-import scala.Some
 
 
 object TwitterApi {

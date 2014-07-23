@@ -1,15 +1,12 @@
-import com.github.retronym.SbtOneJar._
 import SonatypeKeys._
 
 xerial.sbt.Sonatype.sonatypeSettings
-
-oneJarSettings
 
 organization := "me.benoitguigal"
 
 name := "twitter"
 
-version := "1.0"
+version := "1.1-SNAPSHOT"
 
 scalaVersion := "2.10.2"
 
@@ -28,7 +25,7 @@ libraryDependencies ++= {
     "io.spray"          % "spray-can"       % sprayV,
     "io.spray"          %% "spray-json"     % "1.2.6",
     "org.scalatest"     % "scalatest_2.10"  % "2.1.3" % "test",
-    "org.mockito"       % "mockito-core"    % "1.9.5")
+    "org.mockito"       % "mockito-core"    % "1.9.5" % "test")
 }
 
 publishMavenStyle := true
@@ -45,23 +42,24 @@ pomIncludeRepository := { _ => false }
 
 pomExtra := (
   <url>https://github.com/benoitguigal/twitter-spray</url>
-    <licenses>
-      <license>
-        <name>BSD-style</name>
-        <url>http://www.opensource.org/licenses/bsd-license.php</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
-    <scm>
-      <url>git@github.com:benoitguigal/twitter-spray.git</url>
-      <connection>scm:git:git@github.com:benoitguigal/twitter-spray.git</connection>
-    </scm>
-    <developers>
-      <developer>
-        <id>BGuigal</id>
-        <name>Benoit Guigal</name>
-        <url>http://benoitguigal.me</url>
-      </developer>
-    </developers>)
+  <licenses>
+    <license>
+      <name>BSD-style</name>
+      <url>http://www.opensource.org/licenses/bsd-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>git@github.com:benoitguigal/twitter-spray.git</url>
+    <connection>scm:git:git@github.com:benoitguigal/twitter-spray.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>BGuigal</id>
+      <name>Benoit Guigal</name>
+      <url>http://benoitguigal.me</url>
+    </developer>
+  </developers>
+  )
 
 
