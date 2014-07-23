@@ -10,6 +10,18 @@ Twitter-Spray is a scala library based on Spray and Akka for accessing the Twitt
 - Twitter errors are returns as subtypes of `TwitterError`
 - Support for rate limiting, paging and cursoring (yet to come)
 
+### Get Twitter-Spray
+
+Twitter-Spray for scala 2.10.2 is available on Sonatype.
+
+```
+libraryDependencies += "me.benoitguigal" %% "twitter" % "1.1-SNAPSHOT"
+
+resolvers += Resolver.sonatypeRepo("snapshots")
+```
+
+No stable version yet
+
 ### Usage
 
 #### If you already have a token
