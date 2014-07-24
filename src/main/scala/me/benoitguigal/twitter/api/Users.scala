@@ -44,4 +44,132 @@ trait Users {
     }
   }
 
+  def accountUpdateDeliveryDevice(device: String, includeEntities: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def accountUpdateProfile(
+      name: Option[String] = None,
+      url: Option[String] = None,
+      location: Option[String] = None,
+      description: Option[String] = None,
+      includeEntities: Option[String] = None,
+      skipStatus: Option[String] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def accountUpdateProfileBackgroundImage(
+      image: Option[Array[Byte]] = None,
+      tile: Option[Boolean] = None,
+      includeEntities: Option[Boolean] = None,
+      skipStatus: Option[Boolean] = None,
+      use: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def accountUpdateProfileColors(
+      profileBackgroundColor: Option[String] = None,
+      profileLinkColor: Option[String] = None,
+      profileSidebarBorderColor: Option[String] = None,
+      profileSidebarFillColor: Option[String] = None,
+      profileTextColor: Option[String] = None,
+      includeEntities: Option[Boolean] = None,
+      skipStatus: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def accountUpdateProfileImage(
+      image: Array[Byte],
+      includeEntities: Option[Boolean] = None,
+      skipStatus: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def blocksList(
+      includeEntities: Option[Boolean] = None,
+      skipStatus: Option[Boolean] = None,
+      cursor: Option[Int] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def blockIds(
+      stringifyIds: Option[Boolean] = None,
+      cursor: Option[Int] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def blocksCreate(
+      userId: Option[String],
+      screenName: Option[String] = None,
+      includeEntities: Option[Boolean] = None,
+      skipStatus: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def blocksDestroy(
+     userId: Option[String],
+     screenName: Option[String] = None,
+     includeEntities: Option[Boolean] = None,
+     skipStatus: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def usersLookup(
+      screeNames: Seq[String],
+      ids: Seq[String],
+      includeEntities: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def usersShow(
+      userId: String,
+      screeName: String,
+      includeEntities: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def usersSearch(
+      q: String,
+      page: Option[Int] = None,
+      count: Option[Int] = None,
+      includeEntities: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def usersContributees(
+      userId: Option[String],
+      screenName: Option[String] = None,
+      includeEntities: Option[Boolean] = None,
+      skipStatus: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def usersContributors(
+      userId: Option[String],
+      screenName: Option[String] = None,
+      includeEntities: Option[Boolean] = None,
+      skipStatus: Option[Boolean] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def acccountRemoveProfileBanner() = {
+    throw new NotImplementedError()
+  }
+
+  def accountUpdateProfileBanner(
+      banner: Array[Byte],
+      width: Option[Int] = None,
+      height: Option[Int] = None,
+      offsetLeft: Option[Int] = None,
+      offsetTop: Option[Int] = None) = {
+    throw new NotImplementedError()
+  }
+
+  def usersProfileBanners(
+      userId: Option[String],
+      screenName: Option[String]) = {
+    throw new NotImplementedError()
+  }
+
+
 }
