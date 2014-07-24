@@ -10,24 +10,22 @@ object Timeline {
 
   import TwitterApi.exec
 
-  def paginate[Status <: BaseStatus](
-      sinceId: Option[String],
-      count: Int)(
-      timeline: (Int, Option[String], Option[String]) => Future[Seq[Status]]): Future[Seq[Status]] = {
+  def paginate[Status <: BaseStatus](paging: Paging)(
+    timeline: (Paging => Future[Seq[Status]])): Future[Seq[Status]] = {
 
-    def inner(sinceId: Option[String], maxId: Option[String], fullTimeline: Seq[Status]): Future[Seq[Status]] = {
-      timeline(count, sinceId, maxId) flatMap {
+    def inner(paging: Paging, fullTimeline: Seq[Status]): Future[Seq[Status]] = {
+      timeline(paging) flatMap {
         case Nil => Future(fullTimeline)
         case statuses => {
-          val max = (statuses.last.id_str.toLong - 1).toString
-          inner(sinceId, Some(max), fullTimeline ++ statuses)
+          val maxId = (statuses.last.id_str.toLong - 1).toString
+          inner(new Paging(paging.count, paging.sinceId, Some(maxId)), fullTimeline ++ statuses)
         }
       } recover {
         case e: TwitterErrorRateLimitExceeded => fullTimeline
       }
     }
 
-    inner(sinceId, None, Seq.empty[Status])
+    inner(paging, Seq.empty[Status])
   }
 
 }
@@ -38,17 +36,15 @@ trait Timeline {
   import TwitterApi.exec
 
   def mentionsTimeline(
-      count: Option[Int] = None,
-      sinceId: Option[String] = None,
-      maxId: Option[String] = None,
+      paging: Paging = NoPaging,
       trimUser: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
       includeEntities: Option[Boolean] = None): Future[Seq[Status]] = {
 
     val params = Seq(
-        count map ("count" -> _.toString),
-        sinceId map ("since_id" -> _),
-        maxId map ("max_id" -> _),
+        paging.count map ("count" -> _.toString),
+        paging.sinceId map ("since_id" -> _),
+        paging.maxId map ("max_id" -> _),
         trimUser map ("trim_user" -> _.toString),
         contributorDetails map ("contributor_details" -> _.toString),
         includeEntities map ("include_entities" -> _.toString)
@@ -63,9 +59,7 @@ trait Timeline {
   def userTimeline(
       userId: Option[String] = None,
       screenName: Option[String] = None,
-      sinceId: Option[String] = None,
-      count: Option[Int] = None,
-      maxId: Option[String] = None,
+      paging: Paging = NoPaging,
       trimUser: Option[Boolean] = None,
       excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
@@ -76,9 +70,9 @@ trait Timeline {
     val params = Seq(
         userId map ("user_id" -> _),
         screenName map ("screen_name" -> _),
-        sinceId map ("since_id" -> _),
-        count map ("count" -> _.toString),
-        maxId map ("max_id" -> _),
+        paging.sinceId map ("since_id" -> _),
+        paging.count map ("count" -> _.toString),
+        paging.maxId map ("max_id" -> _),
         trimUser map ("trim_user" -> _.toString),
         excludeReplies map ("exclude_replies" -> _.toString),
         contributorDetails map ("contributor_details" -> _.toString),
@@ -92,18 +86,16 @@ trait Timeline {
   }
 
   def homeTimeline(
-      count: Option[Int] = None,
-      sinceId: Option[String] = None,
-      maxId: Option[String] = None,
+      paging: Paging = NoPaging,
       trimUser: Option[Boolean] = None,
       excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
       includeEntities: Option[Boolean] = None): Future[Seq[Status]] = {
 
     val params = Seq(
-        count map ("count" -> _.toString),
-        sinceId map ("since_id" -> _),
-        maxId map ("max_id" -> _),
+        paging.count map ("count" -> _.toString),
+        paging.sinceId map ("since_id" -> _),
+        paging.maxId map ("max_id" -> _),
         trimUser map ("trim_user" -> _.toString),
         excludeReplies map ("exclude_replies" -> _.toString),
         contributorDetails map ("contributor_details" -> _.toString),
@@ -117,17 +109,15 @@ trait Timeline {
   }
 
   def retweetsOfMe(
-      count: Option[Int] = None,
-      sinceId: Option[String] = None,
-      maxId: Option[String] = None,
+      paging: Paging = NoPaging,
       trimUser: Option[Boolean] = None,
       includeEntities: Option[Boolean] = None,
       includeUserEntities: Option[Boolean] = None): Future[Seq[Status]] = {
 
     val params = Seq(
-        count map ("count" -> _.toString),
-        sinceId map ("since_id" -> _),
-        maxId map ("max_id" -> _),
+        paging.count map ("count" -> _.toString),
+        paging.sinceId map ("since_id" -> _),
+        paging.maxId map ("max_id" -> _),
         trimUser map ("trim_user" -> _.toString),
         includeEntities map ("include_entities" -> _.toString),
         includeUserEntities map ("include_user_entities" -> _.toString)
@@ -140,3 +130,7 @@ trait Timeline {
   }
 
 }
+
+
+class Paging(val count: Option[Int], val sinceId: Option[String], val maxId: Option[String])
+object NoPaging extends Paging(None, None, None)

@@ -84,11 +84,12 @@ Timeline results are limited to 200 statuses max. It is possible to iterate thro
 ```
 import me.benoitguigal.twitter.api.Timeline.paginate
 
-paginate(Some("since-id"), 200) { (count, sinceId, maxId) =>
-    twitterApi.userTimeline(screenName = Some("BGuigal"), count = Some(count), sinceId = sinceId, maxId = maxId)
+val paging = new Paging(200, Some("since-id"), Some("max-id"))
+paginate(paging) { paging =>
+    twitterApi.userTimeline(screenName = Some("BGuigal"), paging = paging)
 }
 ```
-The example above retrieves statuses from @BGuigal timeline 200 at a time until "since-id" is reached.
+The example above retrieves statuses from @BGuigal timeline 200 at a time from "max-id" to "since-id".
 May the rate limit be hit in the process, the `paginate` method would recover and return the list of statuses that were
 successfully retrieved. With a rate limit window of 15/user, you can retrieve up to 3000 statuses in a single method call.
 
