@@ -3,7 +3,35 @@ package me.benoitguigal.twitter.api
 import spray.json.JsonParser
 import scala.concurrent.Future
 import me.benoitguigal.twitter.{TwitterApi, version}
+import me.benoitguigal.twitter.TwitterErrorRateLimitExceeded
+import me.benoitguigal.twitter.wrappers.defaults.BaseStatus
 
+
+object Timeline {
+
+  import TwitterApi.exec
+
+  def paginate[Status <: BaseStatus](
+      sinceId: Option[String],
+      count: Int)(
+      timeline: (Int, Option[String], Option[String]) => Future[Seq[Status]]): Future[Seq[Status]] = {
+
+    def inner(sinceId: Option[String], maxId: Option[String], fullTimeline: Seq[Status]): Future[Seq[Status]] = {
+      timeline(count, sinceId, maxId) flatMap {
+        case Nil => Future(fullTimeline)
+        case statuses => {
+          val max = (statuses.last.id_str.toLong - 1).toString
+          inner(sinceId, Some(max), fullTimeline ++ statuses)
+        }
+      } recover {
+        case e: TwitterErrorRateLimitExceeded => fullTimeline
+      }
+    }
+
+    inner(sinceId, None, Seq.empty[Status])
+  }
+
+}
 
 trait Timeline {
   self: TwitterApi =>
@@ -31,6 +59,7 @@ trait Timeline {
       JsonParser(r.entity.asString).convertTo[Seq[Status]]
     }
   }
+
 
   def userTimeline(
       userId: Option[String] = None,

@@ -78,5 +78,20 @@ val twitterApi = new TwitterApi with MyWrapperTypes {
 }
 ```
 
+### Timeline pagination
+It is possible to paginate through a timeline like this :
+
+```
+import me.benoitguigal.twitter.api.Timeline.paginate
+
+paginate(Some("your-since-id"), 200) { (count, sinceId, maxId) =>
+    twitterApi.userTimeline(screenName = Some("BGuigal"), count = Some(count), sinceId = sinceId, maxId = maxId)
+}
+```
+
+This will retrieve statuses from @BGuigal timeline 200 at a time until it reaches "your-since-id". If
+the rate limit is hit, it will simply return the list of statuses that were successfully returned. With a requests per rate
+limit window of 15/user, you can retrieve up to 3000 statuses in a single method call.
+
 ### License
 Twitter-spray is free software licensed under the MIT/X11 license. Details provided in the LICENSE file.

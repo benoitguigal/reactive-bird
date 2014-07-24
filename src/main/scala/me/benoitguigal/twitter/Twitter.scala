@@ -14,7 +14,7 @@ object TwitterApi {
 
   implicit val system = ActorSystem()
   implicit val exec = system.dispatcher // execution context for futures
-  implicit val timeout = Timeout(5, TimeUnit.SECONDS)
+  implicit val timeout = Timeout(10, TimeUnit.SECONDS)
 
   def apply(_consumer: Consumer, _oauthCallback: Option[String] = None) = new TwitterApi with DefaultWrapperTypes {
     override val oauthCallback: Option[String] = _oauthCallback

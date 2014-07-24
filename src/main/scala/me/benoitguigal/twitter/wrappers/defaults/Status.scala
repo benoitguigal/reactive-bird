@@ -2,6 +2,10 @@ package me.benoitguigal.twitter.wrappers.defaults
 
 import org.joda.time.DateTime
 
+trait BaseStatus {
+  val id_str: String
+}
+
 case class Status(
     coordinates: Option[Coordinates],
     created_at: DateTime,
@@ -13,4 +17,4 @@ case class Status(
     retweeted: Boolean,
     source: String,
     text: String,
-    user: User)
+    user: User) extends BaseStatus

@@ -10,8 +10,8 @@ object JsonFormats extends DefaultJsonProtocol {
 
   implicit object CoordinatesJsonFormat extends JsonFormat[Coordinates] {
 
-    override def read(coordinates: JsValue) = coordinates match {
-      case JsArray(Seq(JsNumber(longitude), JsNumber(latitude))) => Coordinates(longitude.toDouble, latitude.toDouble)
+    override def read(coordinates: JsValue) = coordinates.asJsObject.getFields("type", "coordinates") match {
+      case Seq(JsString("Point"), JsArray(Seq(JsNumber(longitude), JsNumber(latitude)))) => Coordinates(longitude.toDouble, latitude.toDouble)
       case _ => throw new Exception
     }
 
