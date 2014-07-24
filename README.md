@@ -8,7 +8,7 @@ Twitter-Spray is a scala library based on Spray and Akka for accessing the Twitt
 - Support for OAuth sign-in flow
 - Successful calls returns scala wrapper types. Default wrapper types are provided for Tweets, User, Entities and Places but you can provide your owns if necessary.
 - Twitter errors are returns as subtypes of `TwitterError`
-- Support for rate limiting, paging and cursoring (yet to come)
+- Support for paginating timelines and navigating collections
 
 ### Get Twitter-Spray
 
@@ -78,20 +78,33 @@ val twitterApi = new TwitterApi with MyWrapperTypes {
 }
 ```
 
-### Timeline pagination
-It is possible to paginate through a timeline like this :
+### Working with timelines
+Timeline results are limited to 200 statuses max. It is possible to iterate through timeline results in order to build a more complete list
 
 ```
 import me.benoitguigal.twitter.api.Timeline.paginate
 
-paginate(Some("your-since-id"), 200) { (count, sinceId, maxId) =>
+paginate(Some("since-id"), 200) { (count, sinceId, maxId) =>
     twitterApi.userTimeline(screenName = Some("BGuigal"), count = Some(count), sinceId = sinceId, maxId = maxId)
 }
 ```
+The example above retrieves statuses from @BGuigal timeline 200 at a time until "since-id" is reached.
+May the rate limit be hit in the process, the `paginate` method would recover and return the list of statuses that were
+successfully retrieved. With a rate limit window of 15/user, you can retrieve up to 3000 statuses in a single method call.
 
-This will retrieve statuses from @BGuigal timeline 200 at a time until it reaches "your-since-id". If
-the rate limit is hit, it will simply return the list of statuses that were successfully returned. With a requests per rate
-limit window of 15/user, you can retrieve up to 3000 statuses in a single method call.
+### Using cursors to navigate collections
+
+The Twitter API utilizes a technique called 'cursoring' to paginate large results set. The example below show how
+to retrieve cursored results:
+
+```
+import me.benoitguigal.twitter.api.Navigation.cursoring
+
+cursoring { cursor =>
+    twitterApi.followersIds(userId = None, screenName = Some("babgi"), cursor = Some(cursor))
+}
+```
+
 
 ### License
 Twitter-spray is free software licensed under the MIT/X11 license. Details provided in the LICENSE file.

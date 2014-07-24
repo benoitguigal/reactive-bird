@@ -6,7 +6,6 @@ import me.benoitguigal.twitter.{TwitterApi, version}
 import me.benoitguigal.twitter.TwitterErrorRateLimitExceeded
 import me.benoitguigal.twitter.wrappers.defaults.BaseStatus
 
-
 object Timeline {
 
   import TwitterApi.exec

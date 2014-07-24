@@ -15,7 +15,7 @@ trait FriendsAndFollowers {
       screenName: Option[String] = None,
       cursor: Option[Long] = None,
       stringifyIds: Option[Boolean] = None,
-      count: Option[Int] = None): Future[Seq[Long]] = {
+      count: Option[Int] = None): Future[(Long, Seq[Long])] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -28,8 +28,8 @@ trait FriendsAndFollowers {
 
     get(s"/$version/friends/ids.json", params) map { r =>
       val json = JsonParser(r.entity.asString)
-      json.asJsObject.getFields("ids") match {
-        case Seq(JsArray(ids)) => ids collect { case JsNumber(id) => id.toLong }
+      json.asJsObject.getFields("next_cursor","ids") match {
+        case Seq(JsNumber(nextCursor), JsArray(ids)) => (nextCursor.toLong, ids collect { case JsNumber(id) => id.toLong })
         case _ => throw new Exception("Failed parsing friends list")
       }
     }
@@ -41,7 +41,7 @@ trait FriendsAndFollowers {
       screenName: Option[String] = None,
       cursor: Option[Long] = None,
       stringifyIds: Option[Boolean] = None,
-      count: Option[Int] = None): Future[Seq[Long]] = {
+      count: Option[Int] = None): Future[(Long, Seq[Long])] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -54,15 +54,15 @@ trait FriendsAndFollowers {
 
     get(s"/$version/followers/ids.json", params) map { r =>
       val json = JsonParser(r.entity.asString)
-      json.asJsObject.getFields("ids") match {
-        case Seq(JsArray(ids)) => ids collect { case JsNumber(id) => id.toLong }
+      json.asJsObject.getFields("next_cursor", "ids") match {
+        case Seq(JsNumber(cursor), JsArray(ids)) => (cursor.toLong, ids collect { case JsNumber(id) => id.toLong })
         case _ => throw new Exception("Failed parsing followers list")
       }
     }
 
   }
 
-  def friendshipsIncoming(cursor: Option[Long] = None, stringifyIds: Option[Boolean] = None) = {
+  def friendshipsIncoming(cursor: Option[Long] = None, stringifyIds: Option[Boolean] = None): Future[(Long, Seq[Long])] = {
 
     val params = Seq(
         cursor map ("cursor" -> _.toString),
@@ -70,14 +70,14 @@ trait FriendsAndFollowers {
 
     get(s"/$version/friendships/incoming.json", params) map { r =>
       val json = JsonParser(r.entity.asString)
-      json.asJsObject.getFields("ids") match {
-        case Seq(JsArray(ids)) => ids collect { case JsNumber(id) => id.toLong }
+      json.asJsObject.getFields("next_cursor", "ids") match {
+        case Seq(JsNumber(cursor), JsArray(ids)) => (cursor.toLong, ids collect { case JsNumber(id) => id.toLong })
         case _ => throw new Exception("Failed parsing incoming friendships list")
       }
     }
   }
 
-  def friendshipsOutgoing(cursor: Option[Long] = None, stringifyIds: Option[Boolean] = None) = {
+  def friendshipsOutgoing(cursor: Option[Long] = None, stringifyIds: Option[Boolean] = None): Future[(Long, Seq[Long])] = {
 
     val params = Seq(
       cursor map ("cursor" -> _.toString),
@@ -85,8 +85,8 @@ trait FriendsAndFollowers {
 
     get(s"/$version/friendships/outgoing.json", params) map { r =>
       val json = JsonParser(r.entity.asString)
-      json.asJsObject.getFields("ids") match {
-        case Seq(JsArray(ids)) => ids collect { case JsNumber(id) => id.toLong }
+      json.asJsObject.getFields("next_cursor", "ids") match {
+        case Seq(JsNumber(cursor), JsArray(ids)) => (cursor.toLong, ids collect { case JsNumber(id) => id.toLong })
         case _ => throw new Exception("Failed parsing outgoing friendships list")
       }
     }
@@ -174,7 +174,7 @@ trait FriendsAndFollowers {
       cursor: Option[Long] = None,
       count: Option[Int] = None,
       skipStatus: Option[Boolean] = None,
-      includeUserEntities: Option[Boolean] = None): Future[Seq[User]] = {
+      includeUserEntities: Option[Boolean] = None): Future[(Long, Seq[User])] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -188,8 +188,8 @@ trait FriendsAndFollowers {
 
       get(s"/$version/friends/list.json", params) map { r =>
         val json = JsonParser(r.entity.asString)
-        json.asJsObject.getFields("users") match {
-          case Seq(users) => users.convertTo[Seq[User]]
+        json.asJsObject.getFields("next_cursor", "users") match {
+          case Seq(JsNumber(cursor), users) => (cursor.toLong, users.convertTo[Seq[User]])
           case _ => throw new Exception("Failed parsing friends list")
         }
       }
@@ -201,7 +201,7 @@ trait FriendsAndFollowers {
        cursor: Option[Long] = None,
        count: Option[Int] = None,
        skipStatus: Option[Boolean] = None,
-       includeUserEntities: Option[Boolean] = None): Future[Seq[User]] = {
+       includeUserEntities: Option[Boolean] = None): Future[(Long, Seq[User])] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -216,8 +216,8 @@ trait FriendsAndFollowers {
 
     get(s"/$version/followers/list.json", params) map { r =>
       val json = JsonParser(r.entity.asString)
-      json.asJsObject.getFields("users") match {
-        case Seq(users) => users.convertTo[Seq[User]]
+      json.asJsObject.getFields("next_cursor", "users") match {
+        case Seq(JsNumber(cursor), users) => (cursor.toLong, users.convertTo[Seq[User]])
         case _ => throw new Exception("Failed parsing followers list")
       }
     }
