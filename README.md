@@ -31,34 +31,27 @@ val twitterApi = TwitterApi(consumer, token)
 val timeline: Future[Seq[Status]] = twitterApi.homeTimeline()
 ```
 
+### Pagination
 
-### Working with timelines
-Timeline results are limited to 200 statuses max. It is possible to iterate through timeline results in order to build a more complete list
-
-```
-import me.benoitguigal.twitter.api.Timeline.paginate
-
-val paging = new Paging(200, Some("since-id"), Some("max-id"))
-paginate(paging) { paging =>
-    twitterApi.userTimeline(screenName = Some("BGuigal"), paging = paging)
-}
-```
-The example above retrieves statuses from @BGuigal timeline 200 at a time from "max-id" to "since-id".
-May the rate limit be hit in the process, the `paginate` method would recover and return the list of statuses that were
-successfully retrieved. With a rate limit window of 15/user, you can retrieve up to 3000 statuses in a single method call.
-
-### Using cursors to navigate collections
-
-The Twitter API utilizes a technique called 'cursoring' to paginate large results set. The example below show how
-to retrieve cursored results:
+When working with timelines or large lists of items, you will need to paginate through the result set.
 
 ```
-import me.benoitguigal.twitter.api.Navigation.cursoring
-
-cursoring { cursor =>
-    twitterApi.followersIds(userId = None, screenName = Some("babgi"), cursor = Some(cursor))
-}
+/// pagination for timelines, working with sinceId and maxId
+val paging = IdPaging(twitterApi.userTimeline(screenName = Some("BGuigal"))(_))
+val tweets: Future[Seq[Status]] = paging.items(500) // retrieves 500 most recent tweets
+val pages: Future[Seq[Seq[Status]] = paging.pages(3, 20) // retrieves 3 pages of 20 tweets
 ```
+
+```
+/// pagination for followers list, working with cursors
+val paging = CursorPaging(twitterApi.followersIds(screenName = Some("BGuigal"))(_))
+val followersIds: Future[Seq[String]] = paging.items(3000) // retrieves 3000 followers
+val pages: Future[Seq[Seq[String]] = paging.pages(2, 1500) // retrieves 2 pages of 1500 followers
+```
+
+May the rate limit be hit in the process, the pagination will stop and return all the items that were
+successfully retrieved
+
 
 ### Providing your own types
 

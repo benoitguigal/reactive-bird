@@ -1,9 +1,7 @@
 package me.benoitguigal.twitter.oauth
 
-import spray.http.HttpRequest
-import spray.http.HttpHeaders.RawHeader
+
 import scala.collection.immutable.TreeMap
-import java.net.URLEncoder
 import me.benoitguigal.twitter._
 import spray.http.HttpRequest
 import me.benoitguigal.twitter.Consumer
@@ -15,7 +13,6 @@ object OAuth {
   implicit class CanBeAuthorizedHttpRequest(request: HttpRequest) {
 
     def authorize(consumer: Consumer, token: Token): HttpRequest = {
-
       val timestamp = SystemTimestamp()
       val nonce = SystemNonce()
 

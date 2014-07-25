@@ -25,7 +25,7 @@ case class OAuthHandler(consumer: Consumer) {
     }
   }
 
-  def requestToken = requestToken("")
+  def requestToken: Future[RequestToken] = requestToken("")
 
   def authorizationUrl(oauthCallback: String): Future[String] = {
     requestToken(oauthCallback) map { requestToken =>
@@ -33,7 +33,7 @@ case class OAuthHandler(consumer: Consumer) {
     }
   }
 
-  def authorizationUrl = authorizationUrl("")
+  def authorizationUrl: Future[String] = authorizationUrl("")
 
   def accessToken(tokenKey: String, oauthVerifier: String): Future[AccessToken] = {
     val httpService = new HttpService {

@@ -14,8 +14,8 @@ object TwitterApi {
   implicit val timeout = Timeout(10, TimeUnit.SECONDS)
 
   def apply(_consumer: Consumer, _token: Token) = new TwitterApi with DefaultWrapperTypes {
-    override val consumer: Consumer = _consumer
-    override val token: Token = _token
+    val consumer: Consumer = _consumer
+    val token: Token = _token
   }
 
 }
@@ -31,6 +31,6 @@ trait TwitterApi
   val consumer: Consumer
   val token: Token
 
-  override val pipeline = HttpPipeline(consumer, token)
+  lazy val pipeline = HttpPipeline(consumer, token)
 }
 

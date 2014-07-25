@@ -13,18 +13,16 @@ trait FriendsAndFollowers {
   def friendsIds(
       userId: Option[String],
       screenName: Option[String] = None,
-      cursor: Option[Long] = None,
-      stringifyIds: Option[Boolean] = None,
-      count: Option[Int] = None): Future[(Long, Seq[Long])] = {
+      stringifyIds: Option[Boolean] = None)(implicit cursor: Cursor = Cursor(None, None)): Future[(Long, Seq[Long])] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
     val params = Seq(
       userId map ("user_id" -> _),
       screenName map ("screen_name" -> _),
-      cursor map ("cursor" -> _.toString),
+      cursor.value map ("cursor" -> _.toString),
       stringifyIds map ("stringify_ids" -> _.toString),
-      count map ("count" -> _.toString)).flatten.toMap
+      cursor.count map ("count" -> _.toString)).flatten.toMap
 
     get(s"/$version/friends/ids.json", params) map { r =>
       val json = JsonParser(r.entity.asString)
@@ -37,20 +35,18 @@ trait FriendsAndFollowers {
   }
 
   def followersIds(
-      userId: Option[String],
+      userId: Option[String] = None,
       screenName: Option[String] = None,
-      cursor: Option[Long] = None,
-      stringifyIds: Option[Boolean] = None,
-      count: Option[Int] = None): Future[(Long, Seq[Long])] = {
+      stringifyIds: Option[Boolean] = None)(implicit cursor: Cursor = Cursor(None, None)): Future[(Long, Seq[Long])] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
     val params = Seq(
       userId map ("user_id" -> _),
       screenName map ("screen_name" -> _),
-      cursor map ("cursor" -> _.toString),
+      cursor.value map ("cursor" -> _.toString),
       stringifyIds map ("stringify_ids" -> _.toString),
-      count map ("count" -> _.toString)).flatten.toMap
+      cursor.count map ("count" -> _.toString)).flatten.toMap
 
     get(s"/$version/followers/ids.json", params) map { r =>
       val json = JsonParser(r.entity.asString)
@@ -62,10 +58,10 @@ trait FriendsAndFollowers {
 
   }
 
-  def friendshipsIncoming(cursor: Option[Long] = None, stringifyIds: Option[Boolean] = None): Future[(Long, Seq[Long])] = {
+  def friendshipsIncoming(stringifyIds: Option[Boolean] = None)(implicit cursor: Cursor = Cursor(None, None)): Future[(Long, Seq[Long])] = {
 
     val params = Seq(
-        cursor map ("cursor" -> _.toString),
+        cursor.value map ("cursor" -> _.toString),
         stringifyIds map ("stringify_ids" -> _.toString)).flatten.toMap
 
     get(s"/$version/friendships/incoming.json", params) map { r =>
@@ -77,10 +73,10 @@ trait FriendsAndFollowers {
     }
   }
 
-  def friendshipsOutgoing(cursor: Option[Long] = None, stringifyIds: Option[Boolean] = None): Future[(Long, Seq[Long])] = {
+  def friendshipsOutgoing(stringifyIds: Option[Boolean] = None)(implicit cursor: Cursor = Cursor(None, None)): Future[(Long, Seq[Long])] = {
 
     val params = Seq(
-      cursor map ("cursor" -> _.toString),
+      cursor.value map ("cursor" -> _.toString),
       stringifyIds map ("stringify_ids" -> _.toString)).flatten.toMap
 
     get(s"/$version/friendships/outgoing.json", params) map { r =>
@@ -171,18 +167,16 @@ trait FriendsAndFollowers {
   def friendsList(
       userId: Option[String],
       screenName: Option[String] = None,
-      cursor: Option[Long] = None,
-      count: Option[Int] = None,
       skipStatus: Option[Boolean] = None,
-      includeUserEntities: Option[Boolean] = None): Future[(Long, Seq[User])] = {
+      includeUserEntities: Option[Boolean] = None)(implicit cursor: Cursor = Cursor(None, None)): Future[(Long, Seq[User])] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
     val params = Seq(
       userId map ("user_id" -> _),
       screenName map ("screen_name" -> _),
-      cursor map ("curosr" -> _.toString),
-      count map ("count" -> _.toString),
+      cursor.value map ("cursor" -> _.toString),
+      cursor.count map ("count" -> _.toString),
       skipStatus map ("skip_status" -> _.toString),
       includeUserEntities map ("include_user_entities" -> _.toString)).flatten.toMap
 
@@ -198,10 +192,8 @@ trait FriendsAndFollowers {
   def followersList(
        userId: Option[String],
        screenName: Option[String] = None,
-       cursor: Option[Long] = None,
-       count: Option[Int] = None,
        skipStatus: Option[Boolean] = None,
-       includeUserEntities: Option[Boolean] = None): Future[(Long, Seq[User])] = {
+       includeUserEntities: Option[Boolean] = None)(implicit cursor: Cursor = Cursor(None, None)): Future[(Long, Seq[User])] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -209,8 +201,8 @@ trait FriendsAndFollowers {
     val params = Seq(
       userId map ("user_id" -> _),
       screenName map ("screen_name" -> _),
-      cursor map ("curosr" -> _.toString),
-      count map ("count" -> _.toString),
+      cursor.value map ("curosr" -> _.toString),
+      cursor.count map ("count" -> _.toString),
       skipStatus map ("skip_status" -> _.toString),
       includeUserEntities map ("include_user_entities" -> _.toString)).flatten.toMap
 
