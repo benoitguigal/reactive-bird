@@ -6,7 +6,7 @@ import me.benoitguigal.twitter.{Token, Consumer}
 import scala.concurrent.Future
 
 
-case class OAuthClient(consumer: Consumer) {
+case class OAuthHandler(consumer: Consumer) {
 
   implicit val system = ActorSystem()
   import system.dispatcher // execution context for futures
@@ -22,6 +22,8 @@ case class OAuthClient(consumer: Consumer) {
       RequestToken.fromResponseBody(r.entity.asString)
     }
   }
+
+  def requestToken = requestToken("")
 
   def accessToken(tokenKey: String, oauthVerifier: String): Future[AccessToken] = {
     val httpService = new HttpService {

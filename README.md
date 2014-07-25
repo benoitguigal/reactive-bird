@@ -96,19 +96,19 @@ val twitterApi = new TwitterApi with MyWrapperTypes {
 ### OAuth flow
 
 ```
-import me.benoitguigal.twitter.oauth.OAuthClient
+import me.benoitguigal.twitter.oauth.OAuthHandler
 
 val consumer = Consumer("your-consumer-key", "your-consumer-secret")
-val oauthClient = OAuthClient(consumer)
+val auth = OAuthHandler(consumer)
 
 /// Get a request token
-val requestToken = oauthClient.requestToken("your-oauth-callback")
+val requestToken = auth.requestToken("your-oauth-callback")
 
 /// Redirect the user to s"https://api.twitter.com/oauth/authenticate?oauth_token=${requestToken.oauthToken}"
 /// the user sign-in and is redirected to "your-oauth-callback"
 /// extract oauth_token and oauth_verifier from the query string and then request an access token
 
-val accessToken = oauthClient.accessToken("oauth_token", "oauth_verifier")
+val accessToken = auth.accessToken("oauth_token", "oauth_verifier")
 /// Store token information and access protected resources
 ```
 
