@@ -102,10 +102,10 @@ val consumer = Consumer("your-consumer-key", "your-consumer-secret")
 val auth = OAuthHandler(consumer)
 
 /// Get a request token
-val requestToken = auth.requestToken("your-oauth-callback")
+val authorizationUrl = auth.authorizationUrl("your-oauth-callback")
 
-/// Redirect the user to s"https://api.twitter.com/oauth/authenticate?oauth_token=${requestToken.oauthToken}"
-/// the user sign-in and is redirected to "your-oauth-callback"
+/// Redirect the user to authorizationUrl for sign-in
+/// Once signed in the user is redirected to "your-oauth-callback"
 /// extract oauth_token and oauth_verifier from the query string and then request an access token
 
 val accessToken = auth.accessToken("oauth_token", "oauth_verifier")

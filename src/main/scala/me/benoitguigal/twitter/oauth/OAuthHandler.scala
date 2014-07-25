@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import me.benoitguigal.twitter.http.{HttpPipeline, HttpService}
 import me.benoitguigal.twitter.{Token, Consumer}
 import scala.concurrent.Future
+import me.benoitguigal.twitter.{host, scheme}
 
 
 case class OAuthHandler(consumer: Consumer) {
@@ -12,6 +13,7 @@ case class OAuthHandler(consumer: Consumer) {
   import system.dispatcher // execution context for futures
 
   val temporaryCredentialsRequestUri = "/oauth/request_token"
+  val resourceOwnerAuthorizationUri = "/oauth/authenticate"
   val tokenRequestUri = "/oauth/access_token"
 
   def requestToken(oauthCallback: String): Future[RequestToken] = {
@@ -24,6 +26,14 @@ case class OAuthHandler(consumer: Consumer) {
   }
 
   def requestToken = requestToken("")
+
+  def authorizationUrl(oauthCallback: String): Future[String] = {
+    requestToken(oauthCallback) map { requestToken =>
+      s"$scheme://$host$resourceOwnerAuthorizationUri"
+    }
+  }
+
+  def authorizationUrl = authorizationUrl("")
 
   def accessToken(tokenKey: String, oauthVerifier: String): Future[AccessToken] = {
     val httpService = new HttpService {
