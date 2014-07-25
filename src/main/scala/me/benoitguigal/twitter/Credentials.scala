@@ -1,5 +1,4 @@
-package me.benoitguigal.twitter.oauth
-
+package me.benoitguigal.twitter
 
 case class Consumer(key: String, secret: String)
 

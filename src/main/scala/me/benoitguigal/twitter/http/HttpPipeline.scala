@@ -5,16 +5,11 @@ import akka.pattern.ask
 import spray.can.Http
 import akka.io.IO
 import spray.client.pipelining._
-import me.benoitguigal.twitter.oauth.{Consumer, Token}
-import spray.http._
 import me.benoitguigal.twitter.TwitterError.errorFilter
 import me.benoitguigal.twitter.oauth.OAuth._
-import me.benoitguigal.twitter.TwitterApi
-import me.benoitguigal.twitter.host
+import me.benoitguigal.twitter.{Token, Consumer, TwitterApi, host}
 import scala.concurrent.Future
 import spray.http.HttpRequest
-import me.benoitguigal.twitter.oauth.Consumer
-import me.benoitguigal.twitter.oauth.Token
 
 object HttpPipeline {
 

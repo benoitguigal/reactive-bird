@@ -6,9 +6,6 @@ import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import me.benoitguigal.twitter.wrappers.{DefaultWrapperTypes, WrapperTypes}
 import me.benoitguigal.twitter.api._
-import me.benoitguigal.twitter.oauth.Consumer
-import me.benoitguigal.twitter.oauth.Token
-
 
 object TwitterApi {
 
@@ -16,9 +13,9 @@ object TwitterApi {
   implicit val exec = system.dispatcher // execution context for futures
   implicit val timeout = Timeout(10, TimeUnit.SECONDS)
 
-  def apply(_consumer: Consumer, _oauthCallback: Option[String] = None) = new TwitterApi with DefaultWrapperTypes {
-    override val oauthCallback: Option[String] = _oauthCallback
+  def apply(_consumer: Consumer, _token: Token) = new TwitterApi with DefaultWrapperTypes {
     override val consumer: Consumer = _consumer
+    override val token: Token = _token
   }
 
 }
@@ -29,19 +26,11 @@ trait TwitterApi
   with Timeline
   with Tweets
   with FriendsAndFollowers
-  with Users
-  with Oauth {
+  with Users {
 
   val consumer: Consumer
-  val oauthCallback: Option[String]
-  var token: Option[Token] = None
+  val token: Token
 
-  override def pipeline = token match {
-    case Some(token) => HttpPipeline(consumer, token)
-    case None => HttpPipeline(consumer, oauthCallback.getOrElse(""))
-  }
-
-  def setToken(_token: Token) = { token = Some(_token) }
-
+  override val pipeline = HttpPipeline(consumer, token)
 }
 

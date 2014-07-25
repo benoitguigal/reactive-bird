@@ -24,59 +24,13 @@ No stable version yet
 
 ### Usage
 
-#### If you already have a token
-
 ```
 val consumer = Consumer("your-consumer-key", "your-consumer-secret")
-val twitterApi = TwitterApi(consumer)
-val token = Token("your-token", Some("your-token-secret"))
-twitterApi.setToken(token)
+val token = Token("your-token-key", "your-token-secret")
+val twitterApi = TwitterApi(consumer, token)
 val timeline: Future[Seq[Status]] = twitterApi.homeTimeline()
 ```
 
-#### If you need to get an access token
-
-```
-val consumer = Consumer("your-consumer-key", "your-consumer-secret")
-val twitterApi = TwitterApi(consumer)
-val requestToken = twitterApi.requestToken("your-oauth-callbak")
-/// send token to the client and ask the user to sign-in. Retrieve token and verifier
-val token = Token("token", None)
-twitterApi.setToken(token)
-val accessToken = twitterApi.accessToken("your-oauth-verifier")
-/// store accessToken and secret
-```
-
-#### If you need to provide your own wrapper types around Twitter objects
-
-First define your own wrapper types
-```
-class MyStatus
-class MyUser
-```
-
-Then define the corresponding JsonFormats
-
-```
-import spray.json._
-object MyJsonFormats extends DefaultJsonProtocol {
- /// your implicit formats go here
-}
-```
-
-Then define your own WrapperTypes and mix it in TwitterApi
-```
-trait MyWrapperTypes {
-  type Status = MyStatus
-  type User = MyUser
-  implicit val statusFormat = MyJsonFormats.statusFormat
-  implicit val userFormat = MyJsonFormats.userFormat
-}
-
-val twitterApi = new TwitterApi with MyWrapperTypes {
-   override val consumer = _consumer
-}
-```
 
 ### Working with timelines
 Timeline results are limited to 200 statuses max. It is possible to iterate through timeline results in order to build a more complete list
@@ -104,6 +58,58 @@ import me.benoitguigal.twitter.api.Navigation.cursoring
 cursoring { cursor =>
     twitterApi.followersIds(userId = None, screenName = Some("babgi"), cursor = Some(cursor))
 }
+```
+
+### Providing your own types
+
+It is possible to provide your own wrapper types for Twitter objects.
+
+```
+class MyStatus
+class MyUser
+```
+
+Then define the corresponding JsonFormats
+
+```
+import spray.json._
+object MyJsonFormats extends DefaultJsonProtocol {
+ /// your implicit formats go here
+}
+```
+
+Then define implementation of the WrapperTypes and mix it in TwitterApi
+```
+trait MyWrapperTypes extends WrapperTypes {
+  type Status = MyStatus
+  type User = MyUser
+  implicit val statusFormat = MyJsonFormats.statusFormat
+  implicit val userFormat = MyJsonFormats.userFormat
+}
+
+val twitterApi = new TwitterApi with MyWrapperTypes {
+  val consumer = _consumer
+  val token = _token
+}
+```
+
+### OAuth flow
+
+```
+import me.benoitguigal.twitter.oauth.OAuthClient
+
+val consumer = Consumer("your-consumer-key", "your-consumer-secret")
+val oauthClient = OAuthClient(consumer)
+
+/// Get a request token
+val requestToken = oauthClient.requestToken("your-oauth-callback")
+
+/// Redirect the user to s"https://api.twitter.com/oauth/authenticate?oauth_token=${requestToken.oauthToken}"
+/// the user sign-in and is redirected to "your-oauth-callback"
+/// extract oauth_token and oauth_verifier from the query string and then request an access token
+
+val accessToken = oauthClient.accessToken("oauth_token", "oauth_verifier")
+/// Store token information and access protected resources
 ```
 
 

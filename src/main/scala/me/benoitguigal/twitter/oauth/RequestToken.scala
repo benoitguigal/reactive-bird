@@ -1,5 +1,7 @@
 package me.benoitguigal.twitter.oauth
 
+import me.benoitguigal.twitter.Token
+
 
 object RequestToken {
 
@@ -8,13 +10,13 @@ object RequestToken {
   def fromResponseBody(body: String): RequestToken = {
     body match {
       case requestTokenR(oauthToken, oauthTokenSecret, oauthCallbackConfirmed) =>
-        RequestToken(oauthToken, oauthTokenSecret, oauthCallbackConfirmed.toBoolean)
+        RequestToken(Token(oauthToken, Some(oauthTokenSecret)), oauthCallbackConfirmed.toBoolean)
       case _ => throw new Exception("Error while parsing request token")
     }
   }
 }
 
-case class RequestToken(oauthToken: String, oauthTokenSecret: String, oauthCallbackConfirmed: Boolean)
+case class RequestToken(token: Token, oauthCallbackConfirmed: Boolean)
 
 
 object AccessToken {
@@ -24,7 +26,7 @@ object AccessToken {
   def fromResponseBody(body: String): AccessToken = {
     body match {
       case accessTokenR(oauthToken, oauthTokenSecret, userId, screenName) =>
-        AccessToken(oauthToken, oauthTokenSecret, userId, screenName)
+        AccessToken(Token(oauthToken, Some(oauthTokenSecret)), userId, screenName)
       case _ => throw new Exception("Error while parsing request token")
 
     }
@@ -32,4 +34,4 @@ object AccessToken {
 
 }
 
-case class AccessToken(oauthToken: String, oauthTokenSecret: String, userId: String, screenName: String)
+case class AccessToken(token: Token, userId: String, screenName: String)

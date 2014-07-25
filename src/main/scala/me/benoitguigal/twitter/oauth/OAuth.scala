@@ -4,8 +4,10 @@ import spray.http.HttpRequest
 import spray.http.HttpHeaders.RawHeader
 import scala.collection.immutable.TreeMap
 import java.net.URLEncoder
-import me.benoitguigal.twitter.{scheme, host}
-import me.benoitguigal.twitter.%%
+import me.benoitguigal.twitter._
+import spray.http.HttpRequest
+import me.benoitguigal.twitter.Consumer
+import spray.http.HttpHeaders.RawHeader
 
 
 object OAuth {
