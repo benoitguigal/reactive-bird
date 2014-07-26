@@ -58,7 +58,7 @@ object JsonFormats extends DefaultJsonProtocol {
 
   implicit val savedSearchFormat = jsonFormat5(SavedSearch)
 
-  implicit val searchMetaDataFormat = jsonFormat9(SearchMetaData)
+  implicit val searchMetaDataFormat = jsonFormat8(SearchMetaData)
 
   implicit val searchResultFormat = jsonFormat2(SearchResults)
 

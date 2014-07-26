@@ -64,16 +64,16 @@ case class DirectMessage(
     entities: Entities,
     id: Long,
     id_str: String,
-    recipient_id: String,
+    recipient_id: Long,
     recipient_screen_name: String,
-    sender_id: String,
+    sender_id: Long,
     sender_screen_name: String,
     text: String)
 
 
 case class Source(
     id: Long,
-    id_str: Boolean,
+    id_str: String,
     screen_name: String,
     following: Boolean,
     followed_by: Boolean)
@@ -98,11 +98,10 @@ case class SavedSearch(
 
 case class SearchResults(
     statuses: Seq[Status],
-    searchMetaData: SearchMetaData)
+    search_metadata: SearchMetaData)
 
 case class SearchMetaData(
-    max_id: String,
-    min_id: String,
+    max_id: Long,
     refresh_url: String,
     next_results: String,
     count: Int,

@@ -3,7 +3,7 @@ package me.benoitguigal.twitter
 import org.scalatest.{Matchers, FlatSpec}
 import spray.json.JsonParser
 import org.joda.time.DateTime
-import me.benoitguigal.twitter.wrappers.defaults._
+import me.benoitguigal.twitter.models.defaults._
 import me.benoitguigal.twitter.models.defaults.JsonFormats
 
 
@@ -12,10 +12,17 @@ class DefaultJsonFormatsSpec extends FlatSpec with Matchers {
   import JsonFormats._
 
   it should "parse Coordinates from json" in {
-    val source = "[-97.51087576,35.46500176]"
+    val source =
+      """{
+        |        "type": "Point",
+        |        "coordinates": [
+        |          54.48590707,
+        |          24.41206586
+        |        ]
+        |      }""".stripMargin
     val json = JsonParser(source)
     val coordinates = json.convertTo[Coordinates]
-    coordinates should equal(Coordinates(-97.51087576d, 35.46500176d))
+    coordinates should equal(Coordinates(54.48590707d, 24.41206586d))
   }
 
 
@@ -316,7 +323,391 @@ class DefaultJsonFormatsSpec extends FlatSpec with Matchers {
         |    "in_reply_to_status_id": null
         |}""".stripMargin
     val json = JsonParser(source)
-    json.convertTo[Status]
+    val status = json.convertTo[Status]
+    status should equal (Status(
+        None,
+        new DateTime(1346260378000L),
+        Entities(Some(List()),
+        None,
+        Some(List(URL("dev.twitter.com/blog/twitter-c…","https://dev.twitter.com/blog/twitter-certified-products",List(52, 73),"https://t.co/MjJ8xAnT"))),
+        Some(List())),
+        None,
+        240859602684612600L,
+        "240859602684612608",
+        121,
+        false,
+        "<a href=\"http://sites.google.com/site/yorufukurou/\" rel=\"nofollow\">YoruFukurou</a>",
+        "Introducing the Twitter Certified Products Program: https://t.co/MjJ8xAnT",
+        User(new DateTime(1179900073000L), 1212864, 31, 6253282L, "6253282", "Twitter API", "twitterapi",3333)))
+  }
+
+  it should "parse DirectMessage from json" in {
+    val source =
+      """{
+        |    "created_at": "Mon Aug 27 17:21:03 +0000 2012",
+        |    "entities": {
+        |        "hashtags": [],
+        |        "urls": [],
+        |        "user_mentions": []
+        |    },
+        |    "id": 240136858829479936,
+        |    "id_str": "240136858829479936",
+        |    "recipient": {
+        |        "contributors_enabled": false,
+        |        "created_at": "Thu Aug 23 19:45:07 +0000 2012",
+        |        "default_profile": false,
+        |        "default_profile_image": false,
+        |        "description": "Keep calm and test",
+        |        "favourites_count": 0,
+        |        "follow_request_sent": false,
+        |        "followers_count": 0,
+        |        "following": false,
+        |        "friends_count": 10,
+        |        "geo_enabled": true,
+        |        "id": 776627022,
+        |        "id_str": "776627022",
+        |        "is_translator": false,
+        |        "lang": "en",
+        |        "listed_count": 0,
+        |        "location": "San Francisco, CA",
+        |        "name": "Mick Jagger",
+        |        "notifications": false,
+        |        "profile_background_color": "000000",
+        |        "profile_background_image_url": "http://a0.twimg.com/profile_background_images/644522235/cdjlccey99gy36j3em67.jpeg",
+        |        "profile_background_image_url_https": "https://si0.twimg.com/profile_background_images/644522235/cdjlccey99gy36j3em67.jpeg",
+        |        "profile_background_tile": true,
+        |        "profile_image_url": "http://a0.twimg.com/profile_images/2550226257/y0ef5abcx5yrba8du0sk_normal.jpeg",
+        |        "profile_image_url_https": "https://si0.twimg.com/profile_images/2550226257/y0ef5abcx5yrba8du0sk_normal.jpeg",
+        |        "profile_link_color": "000000",
+        |        "profile_sidebar_border_color": "000000",
+        |        "profile_sidebar_fill_color": "000000",
+        |        "profile_text_color": "000000",
+        |        "profile_use_background_image": false,
+        |        "protected": false,
+        |        "screen_name": "s0c1alm3dia",
+        |        "show_all_inline_media": false,
+        |        "statuses_count": 0,
+        |        "time_zone": "Pacific Time (US & Canada)",
+        |        "url": "http://cnn.com",
+        |        "utc_offset": -28800,
+        |        "verified": false
+        |    },
+        |    "recipient_id": 776627022,
+        |    "recipient_screen_name": "s0c1alm3dia",
+        |    "sender": {
+        |        "contributors_enabled": true,
+        |        "created_at": "Sat May 09 17:58:22 +0000 2009",
+        |        "default_profile": false,
+        |        "default_profile_image": false,
+        |        "description": "I taught your phone that thing you like.  The Mobile Partner Engineer @Twitter. ",
+        |        "favourites_count": 584,
+        |        "follow_request_sent": false,
+        |        "followers_count": 10621,
+        |        "following": false,
+        |        "friends_count": 1181,
+        |        "geo_enabled": true,
+        |        "id": 38895958,
+        |        "id_str": "38895958",
+        |        "is_translator": false,
+        |        "lang": "en",
+        |        "listed_count": 190,
+        |        "location": "San Francisco",
+        |        "name": "Sean Cook",
+        |        "notifications": false,
+        |        "profile_background_color": "1A1B1F",
+        |        "profile_background_image_url": "http://a0.twimg.com/profile_background_images/495742332/purty_wood.png",
+        |        "profile_background_image_url_https": "https://si0.twimg.com/profile_background_images/495742332/purty_wood.png",
+        |        "profile_background_tile": true,
+        |        "profile_image_url": "http://a0.twimg.com/profile_images/1751506047/dead_sexy_normal.JPG",
+        |        "profile_image_url_https": "https://si0.twimg.com/profile_images/1751506047/dead_sexy_normal.JPG",
+        |        "profile_link_color": "2FC2EF",
+        |        "profile_sidebar_border_color": "181A1E",
+        |        "profile_sidebar_fill_color": "252429",
+        |        "profile_text_color": "666666",
+        |        "profile_use_background_image": true,
+        |        "protected": false,
+        |        "screen_name": "theSeanCook",
+        |        "show_all_inline_media": true,
+        |        "statuses_count": 2608,
+        |        "time_zone": "Pacific Time (US & Canada)",
+        |        "url": null,
+        |        "utc_offset": -28800,
+        |        "verified": false
+        |    },
+        |    "sender_id": 38895958,
+        |    "sender_screen_name": "theSeanCook",
+        |    "text": "booyakasha"
+        |}""".stripMargin
+    val json = JsonParser(source)
+    val directMessage = json.convertTo[DirectMessage]
+    directMessage should equal(DirectMessage(
+        new DateTime(1346088063000L),
+        Entities(Some(List()),None,Some(List()),Some(List())),
+        240136858829479936L,
+        "240136858829479936",
+        776627022L,
+        "s0c1alm3dia",
+        38895958L,
+        "theSeanCook",
+        "booyakasha")
+    )
+  }
+
+  it should "parse Source from json" in {
+    val sourceJ =
+        """{
+          |  "can_dm": true,
+          |  "blocking": false,
+          |  "id_str": "819797",
+          |  "all_replies": false,
+          |  "want_retweets": true,
+          |  "id": 819797,
+          |  "marked_spam": false,
+          |  "followed_by": true,
+          |  "notifications_enabled": true,
+          |  "screen_name": "episod",
+          |  "following": true
+          |}""".stripMargin
+    val json = JsonParser(sourceJ)
+    val source = json.convertTo[Source]
+    source should equal (Source(819797L,"819797","episod",true,true))
+  }
+
+  it should "parse Target from json" in {
+    val source =
+        """{
+          |  "id_str": "1401881",
+          |  "id": 1401881,
+          |  "followed_by": true,
+          |  "screen_name": "dougw",
+          |  "following": true
+          |}""".stripMargin
+    val json = JsonParser(source)
+    val target = json.convertTo[Target]
+    target should equal(Target(1401881L, "1401881", "dougw", true, true))
+  }
+
+  it should "parse Relationship from json" in {
+    val source =
+        """{
+          |    "target": {
+          |      "id_str": "1401881",
+          |      "id": 1401881,
+          |      "followed_by": true,
+          |      "screen_name": "dougw",
+          |      "following": true
+          |    },
+          |    "source": {
+          |      "can_dm": true,
+          |      "blocking": false,
+          |      "id_str": "819797",
+          |      "all_replies": false,
+          |      "want_retweets": true,
+          |      "id": 819797,
+          |      "marked_spam": false,
+          |      "followed_by": true,
+          |      "notifications_enabled": true,
+          |      "screen_name": "episod",
+          |      "following": true
+          |    }
+          |  }""".stripMargin
+    val json = JsonParser(source)
+    val relationship = json.convertTo[Relationship]
+    relationship should equal(Relationship(
+      Source( 819797L, "819797", "episod", true, true), Target( 1401881L, "1401881", "dougw", true, true)))
+  }
+
+  it should "parse Friendship from json" in {
+    val source =
+        """{
+          |  "relationship": {
+          |    "target": {
+          |      "id_str": "1401881",
+          |      "id": 1401881,
+          |      "followed_by": true,
+          |      "screen_name": "dougw",
+          |      "following": true
+          |    },
+          |    "source": {
+          |      "can_dm": true,
+          |      "blocking": false,
+          |      "id_str": "819797",
+          |      "all_replies": false,
+          |      "want_retweets": true,
+          |      "id": 819797,
+          |      "marked_spam": false,
+          |      "followed_by": true,
+          |      "notifications_enabled": true,
+          |      "screen_name": "episod",
+          |      "following": true
+          |    }
+          |  }
+          |}""".stripMargin
+    val json = JsonParser(source)
+    val friendship = json.convertTo[Friendship]
+    friendship should equal(Friendship(
+      Relationship(Source(819797L, "819797", "episod", true, true), Target(1401881L, "1401881", "dougw", true, true))))
+  }
+
+  it should "parse SavedSearch from json" in {
+
+    val source =
+        """{
+          |  "created_at": "Fri Nov 04 18:46:41 +0000 2011",
+          |  "id": 62353170,
+          |  "id_str": "62353170",
+          |  "name": "@anywhere",
+          |  "position": null,
+          |  "query": "@anywhere"
+          |}""".stripMargin
+    val json = JsonParser(source)
+    val savedSearch = json.convertTo[SavedSearch]
+    savedSearch should equal(SavedSearch(new DateTime(1320432401000L), 62353170L, "62353170", "@anywhere", "@anywhere"))
+  }
+
+  it should "parse SearchMetaData" in {
+
+    val source =
+        """{
+          |  "max_id": 250126199840518145,
+          |  "since_id": 24012619984051000,
+          |  "refresh_url": "?since_id=250126199840518145&q=%23freebandnames&result_type=mixed&include_entities=1",
+          |  "next_results": "?max_id=249279667666817023&q=%23freebandnames&count=4&include_entities=1&result_type=mixed",
+          |  "count": 4,
+          |  "completed_in": 0.035,
+          |  "since_id_str": "24012619984051000",
+          |  "query": "%23freebandnames",
+          |  "max_id_str": "250126199840518145"
+          |}""".stripMargin
+
+    val json = JsonParser(source)
+    val searchMetaData = json.convertTo[SearchMetaData]
+    searchMetaData should equal(SearchMetaData(
+        250126199840518145L,
+        "?since_id=250126199840518145&q=%23freebandnames&result_type=mixed&include_entities=1",
+        "?max_id=249279667666817023&q=%23freebandnames&count=4&include_entities=1&result_type=mixed",
+        4,
+        0.035,
+        "24012619984051000",
+        "%23freebandnames",
+        "250126199840518145"))
+  }
+
+  it should "parse SearchResults" in {
+
+    val source =
+        """{
+          |  "statuses": [
+          |    {
+          |      "coordinates": null,
+          |      "favorited": false,
+          |      "truncated": false,
+          |      "created_at": "Fri Sep 21 22:51:18 +0000 2012",
+          |      "id_str": "249279667666817024",
+          |      "entities": {
+          |        "urls": [],
+          |        "hashtags": [
+          |          {
+          |            "text": "freebandnames",
+          |            "indices": [
+          |              20,
+          |              34
+          |            ]
+          |          }
+          |        ],
+          |        "user_mentions": []
+          |      },
+          |      "in_reply_to_user_id_str": null,
+          |      "contributors": null,
+          |      "text": "The Foolish Mortals #freebandnames",
+          |      "metadata": {
+          |        "iso_language_code": "en",
+          |        "result_type": "recent"
+          |      },
+          |      "retweet_count": 0,
+          |      "in_reply_to_status_id_str": null,
+          |      "id": 249279667666817024,
+          |      "geo": null,
+          |      "retweeted": false,
+          |      "in_reply_to_user_id": null,
+          |      "place": null,
+          |      "user": {
+          |        "profile_sidebar_fill_color": "BFAC83",
+          |        "profile_sidebar_border_color": "615A44",
+          |        "profile_background_tile": true,
+          |        "name": "Marty Elmer",
+          |        "profile_image_url": "http://a0.twimg.com/profile_images/1629790393/shrinker_2000_trans_normal.png",
+          |        "created_at": "Mon May 04 00:05:00 +0000 2009",
+          |        "location": "Wisconsin, USA",
+          |        "follow_request_sent": null,
+          |        "profile_link_color": "3B2A26",
+          |        "is_translator": false,
+          |        "id_str": "37539828",
+          |        "entities": {
+          |          "url": {
+          |            "urls": [
+          |              {
+          |                "expanded_url": null,
+          |                "url": "http://www.omnitarian.me",
+          |                "indices": [
+          |                  0,
+          |                  24
+          |                ]
+          |              }
+          |            ]
+          |          },
+          |          "description": {
+          |            "urls": []
+          |          }
+          |        },
+          |        "default_profile": false,
+          |        "contributors_enabled": false,
+          |        "favourites_count": 647,
+          |        "url": "http://www.omnitarian.me",
+          |        "profile_image_url_https": "https://si0.twimg.com/profile_images/1629790393/shrinker_2000_trans_normal.png",
+          |        "utc_offset": -21600,
+          |        "id": 37539828,
+          |        "profile_use_background_image": true,
+          |        "listed_count": 52,
+          |        "profile_text_color": "000000",
+          |        "lang": "en",
+          |        "followers_count": 608,
+          |        "protected": false,
+          |        "notifications": null,
+          |        "profile_background_image_url_https": "https://si0.twimg.com/profile_background_images/106455659/rect6056-9.png",
+          |        "profile_background_color": "EEE3C4",
+          |        "verified": false,
+          |        "geo_enabled": false,
+          |        "time_zone": "Central Time (US & Canada)",
+          |        "description": "Cartoonist, Illustrator, and T-Shirt connoisseur",
+          |        "default_profile_image": false,
+          |        "profile_background_image_url": "http://a0.twimg.com/profile_background_images/106455659/rect6056-9.png",
+          |        "statuses_count": 3575,
+          |        "friends_count": 249,
+          |        "following": null,
+          |        "show_all_inline_media": true,
+          |        "screen_name": "Omnitarian"
+          |      },
+          |      "in_reply_to_screen_name": null,
+          |      "source": "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>",
+          |      "in_reply_to_status_id": null
+          |    }
+          |  ],
+          |  "search_metadata": {
+          |    "max_id": 250126199840518145,
+          |    "since_id": 24012619984051000,
+          |    "refresh_url": "?since_id=250126199840518145&q=%23freebandnames&result_type=mixed&include_entities=1",
+          |    "next_results": "?max_id=249279667666817023&q=%23freebandnames&count=4&include_entities=1&result_type=mixed",
+          |    "count": 4,
+          |    "completed_in": 0.035,
+          |    "since_id_str": "24012619984051000",
+          |    "query": "%23freebandnames",
+          |    "max_id_str": "250126199840518145"
+          |  }
+          |}""".stripMargin
+
+    val json = JsonParser(source)
+    val searchResults = json.convertTo[SearchResults]
   }
 
 }
