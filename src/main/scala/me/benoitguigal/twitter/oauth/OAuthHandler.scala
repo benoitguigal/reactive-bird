@@ -1,7 +1,7 @@
 package me.benoitguigal.twitter.oauth
 
 import akka.actor.ActorSystem
-import me.benoitguigal.twitter.http.{HttpPipeline, HttpService}
+import me.benoitguigal.twitter.http.{Authorizer, HttpService}
 import me.benoitguigal.twitter.{Token, Consumer}
 import scala.concurrent.Future
 import me.benoitguigal.twitter.{host, scheme}
@@ -18,7 +18,7 @@ case class OAuthHandler(consumer: Consumer) {
 
   def requestToken(oauthCallback: String): Future[RequestToken] = {
     val httpService = new HttpService {
-      override def pipeline = HttpPipeline(consumer, oauthCallback)
+      def authorizer = Authorizer(consumer, oauthCallback)
     }
     httpService.post(temporaryCredentialsRequestUri, Map()) map { r =>
       RequestToken.fromResponseBody(r.entity.asString)
@@ -37,7 +37,7 @@ case class OAuthHandler(consumer: Consumer) {
 
   def accessToken(tokenKey: String, oauthVerifier: String): Future[AccessToken] = {
     val httpService = new HttpService {
-      override def pipeline = HttpPipeline(consumer, Token(tokenKey, None))
+      def authorizer = Authorizer(consumer, Token(tokenKey, None))
     }
     val content = s"oauth_verifier=$oauthVerifier"
     httpService.post(tokenRequestUri, Map(), Some(content)) map { r =>

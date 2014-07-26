@@ -6,13 +6,25 @@ import scala.concurrent.Future
 import spray.http._
 import spray.http.Uri.Query
 import spray.http.HttpResponse
+import spray.can.Http
+import akka.io.IO
+import me.benoitguigal.twitter.TwitterApi
+import me.benoitguigal.twitter.host
+import akka.pattern.ask
 
 
 trait HttpService {
 
-  import me.benoitguigal.twitter.TwitterApi.exec
+  import TwitterApi.{system, exec, timeout}
 
-  def pipeline: Future[SendReceive]
+  lazy private val sendReceiveFut = for (
+    Http.HostConnectorInfo(connector, _) <-
+    IO(Http) ? Http.HostConnectorSetup(host, port = 443, sslEncryption = true)
+  ) yield (sendReceive(connector))
+
+  def authorizer: RequestTransformer
+
+  lazy private val pipeline = sendReceiveFut map { authorizer ~> _ }
 
   def get(path: String, params: Map[String, String]): Future[HttpResponse] = {
     val uri = Uri.from(path = path, query = Query(params))

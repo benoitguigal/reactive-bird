@@ -1,6 +1,6 @@
 package me.benoitguigal.twitter
 
-import me.benoitguigal.twitter.http.{HttpPipeline, HttpService}
+import me.benoitguigal.twitter.http.{Authorizer, HttpService}
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
@@ -31,6 +31,6 @@ trait TwitterApi
   val consumer: Consumer
   val token: Token
 
-  lazy val pipeline = HttpPipeline(consumer, token)
+  override def authorizer = Authorizer(consumer, token)
 }
 
