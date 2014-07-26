@@ -1,4 +1,4 @@
-package me.benoitguigal.twitter.wrappers.defaults
+package me.benoitguigal.twitter.models
 
 import spray.json._
 import org.joda.time.DateTime
