@@ -2,15 +2,16 @@ package me.benoitguigal.twitter.oauth
 
 import akka.actor.ActorSystem
 import me.benoitguigal.twitter.http.{Authorizer, HttpService}
-import me.benoitguigal.twitter.{Token, Consumer}
+import me.benoitguigal.twitter._
 import scala.concurrent.Future
-import me.benoitguigal.twitter.{host, scheme}
+import me.benoitguigal.twitter.Consumer
+import me.benoitguigal.twitter.Token
+import scala.Some
 
 
 case class OAuthHandler(consumer: Consumer) {
 
-  implicit val system = ActorSystem()
-  import system.dispatcher // execution context for futures
+  import Akka.exec
 
   val temporaryCredentialsRequestUri = "/oauth/request_token"
   val resourceOwnerAuthorizationUri = "/oauth/authenticate"

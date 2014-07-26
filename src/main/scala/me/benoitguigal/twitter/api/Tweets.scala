@@ -1,6 +1,6 @@
 package me.benoitguigal.twitter.api
 
-import me.benoitguigal.twitter.TwitterApi
+import me.benoitguigal.twitter.{TwitterApi, Akka}
 import scala.concurrent.Future
 import spray.json.JsonParser
 import me.benoitguigal.twitter.version
@@ -10,7 +10,7 @@ import me.benoitguigal.twitter.%%
 trait Tweets {
   self: TwitterApi =>
 
-  import TwitterApi.exec
+  import Akka.exec
 
   def retweets(id: String, count: Option[Int] = None, trimUser: Option[Boolean] = None): Future[Seq[Status]] = {
     val path = s"/$version/statuses/retweets/$id.json"

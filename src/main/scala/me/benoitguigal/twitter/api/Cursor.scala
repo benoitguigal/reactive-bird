@@ -1,7 +1,7 @@
 package me.benoitguigal.twitter.api
 
 import scala.concurrent.Future
-import me.benoitguigal.twitter.{TwitterApi, TwitterErrorRateLimitExceeded}
+import me.benoitguigal.twitter.{Akka, TwitterErrorRateLimitExceeded}
 import me.benoitguigal.twitter.models.{CursoredResultSet, ResultSet, CanBeIdentified}
 
 
@@ -20,7 +20,7 @@ trait Paging[A] {
 
 case class CursorPaging[A <: CanBeIdentified](pageable: Cursor => Future[CursoredResultSet[A]]) extends Paging[A] {
 
-  import TwitterApi.exec
+  import Akka.exec
 
   override def items(n: Int) = {
 
@@ -97,7 +97,7 @@ case class CursorPaging[A <: CanBeIdentified](pageable: Cursor => Future[Cursore
 
 case class IdPaging[A <: CanBeIdentified](pageable: Page => Future[ResultSet[A]]) extends Paging[A] {
 
-  import TwitterApi.exec
+  import Akka.exec
 
   def items(n: Int) = {
 

@@ -1,13 +1,13 @@
 package me.benoitguigal.twitter.api
 
-import me.benoitguigal.twitter.TwitterApi
+import me.benoitguigal.twitter.{TwitterApi, Akka}
 import me.benoitguigal.twitter.version
 import spray.json.JsonParser
 
 trait Users {
   self: TwitterApi =>
 
-  import TwitterApi.exec
+  import Akka.exec
 
   def accountSettings = {
     get(s"/$version/account/settings.json", Map()) map { r =>

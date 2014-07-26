@@ -1,16 +1,15 @@
 package me.benoitguigal.twitter.api
 
-import me.benoitguigal.twitter.{TwitterApi, version}
+import me.benoitguigal.twitter.{Akka, version, TwitterApi}
 import spray.json.{JsNumber, JsArray, JsonParser}
 import scala.concurrent.Future
-import me.benoitguigal.twitter.models.defaults.JsonFormats
 import me.benoitguigal.twitter.models.{UserId, CursoredResultSet}
 
 
 trait FriendsAndFollowers {
   self: TwitterApi =>
 
-  import TwitterApi.exec
+  import Akka.exec
 
   def friendsIds(
       userId: Option[String],

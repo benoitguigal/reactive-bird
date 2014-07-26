@@ -2,8 +2,7 @@ package me.benoitguigal.twitter.api
 
 import spray.json.JsonParser
 import scala.concurrent.Future
-import me.benoitguigal.twitter.{TwitterApi, version}
-import me.benoitguigal.twitter.TwitterErrorRateLimitExceeded
+import me.benoitguigal.twitter.{TwitterApi, Akka, version}
 import me.benoitguigal.twitter.models.ResultSet
 
 
@@ -11,7 +10,7 @@ import me.benoitguigal.twitter.models.ResultSet
 trait Timeline {
   self: TwitterApi =>
 
-  import TwitterApi.exec
+  import Akka.exec
 
   def mentionsTimeline(
       trimUser: Option[Boolean] = None,

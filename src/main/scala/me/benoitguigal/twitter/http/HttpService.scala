@@ -8,14 +8,14 @@ import spray.http.Uri.Query
 import spray.http.HttpResponse
 import spray.can.Http
 import akka.io.IO
-import me.benoitguigal.twitter.TwitterApi
+import me.benoitguigal.twitter.Akka
 import me.benoitguigal.twitter.host
 import akka.pattern.ask
 
 
 trait HttpService {
 
-  import TwitterApi.{system, exec, timeout}
+  import Akka.{system, exec, timeout}
 
   lazy private val sendReceiveFut = for (
     Http.HostConnectorInfo(connector, _) <-
