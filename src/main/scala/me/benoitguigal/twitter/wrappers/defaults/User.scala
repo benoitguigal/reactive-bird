@@ -1,6 +1,7 @@
 package me.benoitguigal.twitter.wrappers.defaults
 
 import org.joda.time.DateTime
+import me.benoitguigal.twitter.models.CanBeIdentified
 
 
 case class User(
@@ -11,4 +12,4 @@ case class User(
      id_str: String,
      name: String,
      screen_name: String,
-     statuses_count: Int)
+     statuses_count: Int) extends CanBeIdentified

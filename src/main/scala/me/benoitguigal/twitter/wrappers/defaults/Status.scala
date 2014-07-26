@@ -1,10 +1,8 @@
 package me.benoitguigal.twitter.wrappers.defaults
 
 import org.joda.time.DateTime
+import me.benoitguigal.twitter.models.CanBeIdentified
 
-trait BaseStatus {
-  val id_str: String
-}
 
 case class Status(
     coordinates: Option[Coordinates],
@@ -17,4 +15,4 @@ case class Status(
     retweeted: Boolean,
     source: String,
     text: String,
-    user: User) extends BaseStatus
+    user: User) extends CanBeIdentified

@@ -1,11 +1,11 @@
 package me.benoitguigal.twitter.wrappers
 
 import spray.json.{CollectionFormats, JsonFormat}
-import me.benoitguigal.twitter.wrappers.defaults.BaseStatus
+import me.benoitguigal.twitter.models.CanBeIdentified
 
 trait WrapperTypes extends CollectionFormats {
-  type Status <: BaseStatus
-  type User
+  type Status <: CanBeIdentified
+  type User <: CanBeIdentified
   implicit val statusFormat: JsonFormat[Status]
   implicit val userFormat: JsonFormat[User]
 

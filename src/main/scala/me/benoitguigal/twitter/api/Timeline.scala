@@ -4,7 +4,7 @@ import spray.json.JsonParser
 import scala.concurrent.Future
 import me.benoitguigal.twitter.{TwitterApi, version}
 import me.benoitguigal.twitter.TwitterErrorRateLimitExceeded
-import me.benoitguigal.twitter.wrappers.defaults.BaseStatus
+import me.benoitguigal.twitter.models.ResultSet
 
 
 
@@ -16,7 +16,7 @@ trait Timeline {
   def mentionsTimeline(
       trimUser: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[Seq[Status]] = {
+      includeEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[ResultSet[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
@@ -28,7 +28,7 @@ trait Timeline {
     ).flatten.toMap
 
     get(s"/$version/statuses/mentions_timeline.json", params) map { r =>
-      JsonParser(r.entity.asString).convertTo[Seq[Status]]
+      new ResultSet(JsonParser(r.entity.asString).convertTo[Seq[Status]])
     }
   }
 
@@ -39,7 +39,7 @@ trait Timeline {
       trimUser: Option[Boolean] = None,
       excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeRts: Option[Boolean] = None)(implicit page : Page = Page(None, None, None)): Future[Seq[Status]] = {
+      includeRts: Option[Boolean] = None)(implicit page : Page = Page(None, None, None)): Future[ResultSet[Status]] = {
 
     require(userId.isDefined || screenName.isDefined)
 
@@ -56,7 +56,7 @@ trait Timeline {
     ).flatten.toMap
 
     get(s"/$version/statuses/user_timeline.json", params) map { r =>
-      JsonParser(r.entity.asString).convertTo[Seq[Status]]
+      new ResultSet(JsonParser(r.entity.asString).convertTo[Seq[Status]])
     }
 
   }
@@ -65,7 +65,7 @@ trait Timeline {
       trimUser: Option[Boolean] = None,
       excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[Seq[Status]] = {
+      includeEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[ResultSet[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
@@ -78,7 +78,7 @@ trait Timeline {
     ).flatten.toMap
 
     get(s"/$version/statuses/home_timeline.json", params) map { r =>
-      JsonParser(r.entity.asString).convertTo[Seq[Status]]
+      new ResultSet(JsonParser(r.entity.asString).convertTo[Seq[Status]])
     }
 
   }
@@ -86,7 +86,7 @@ trait Timeline {
   def retweetsOfMe(
       trimUser: Option[Boolean] = None,
       includeEntities: Option[Boolean] = None,
-      includeUserEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[Seq[Status]] = {
+      includeUserEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[ResultSet[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
@@ -98,7 +98,7 @@ trait Timeline {
     ).flatten.toMap
 
     get(s"/$version/statuses/retweets_of_me.json", params) map { r =>
-      JsonParser(r.entity.asString).convertTo[Seq[Status]]
+      new ResultSet(JsonParser(r.entity.asString).convertTo[Seq[Status]])
     }
 
   }

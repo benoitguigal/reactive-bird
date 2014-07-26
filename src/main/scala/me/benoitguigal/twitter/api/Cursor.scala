@@ -1,8 +1,8 @@
 package me.benoitguigal.twitter.api
 
 import scala.concurrent.Future
-import me.benoitguigal.twitter.wrappers.defaults.BaseStatus
 import me.benoitguigal.twitter.{TwitterApi, TwitterErrorRateLimitExceeded}
+import me.benoitguigal.twitter.models.{CursoredResultSet, ResultSet, CanBeIdentified}
 
 
 case class Page(count: Option[Int], sinceId: Option[String], maxId: Option[String])
@@ -18,7 +18,7 @@ trait Paging[A] {
   def pages(countPerPage: Int): Future[Seq[Seq[A]]]
 }
 
-case class CursorPaging[A](pageable: Cursor => Future[(Long, Seq[A])]) extends Paging[A] {
+case class CursorPaging[A <: CanBeIdentified](pageable: Cursor => Future[CursoredResultSet[A]]) extends Paging[A] {
 
   import TwitterApi.exec
 
@@ -26,9 +26,9 @@ case class CursorPaging[A](pageable: Cursor => Future[(Long, Seq[A])]) extends P
 
     def inner(cursor: Cursor, acc: Seq[A]): Future[Seq[A]] = {
       pageable(cursor) flatMap {
-        case (_, Nil) => Future(acc.take(n))
-        case (0L, _) => Future(acc.take(n))
-        case (newCursor, items) => {
+        case CursoredResultSet(Nil, _) => Future(acc.take(n))
+        case CursoredResultSet(_, 0L) => Future(acc.take(n))
+        case CursoredResultSet(items, newCursor) => {
           val newItems = acc ++ items
           if (newItems.size >= n)
             Future(newItems.take(n))
@@ -46,9 +46,9 @@ case class CursorPaging[A](pageable: Cursor => Future[(Long, Seq[A])]) extends P
   override def items = {
     def inner(cursor: Cursor, acc: Seq[A]): Future[Seq[A]] = {
       pageable(cursor) flatMap {
-        case (_, Nil) => Future(acc)
-        case (0L, _) => Future(acc)
-        case (newCursor, items) => inner(cursor.copy(value = Some(newCursor)), acc ++ items)
+        case CursoredResultSet(Nil, _) => Future(acc)
+        case CursoredResultSet(_, 0L) => Future(acc)
+        case CursoredResultSet(items, newCursor) => inner(cursor.copy(value = Some(newCursor)), acc ++ items)
       } recover {
         case e: TwitterErrorRateLimitExceeded => acc
       }
@@ -62,9 +62,9 @@ case class CursorPaging[A](pageable: Cursor => Future[(Long, Seq[A])]) extends P
 
     def inner(cursor: Cursor, acc: Seq[Seq[A]], page: Int): Future[Seq[Seq[A]]] = {
       pageable(cursor) flatMap {
-        case (_, Nil) => Future(acc)
-        case (0L, _) => Future(acc)
-        case (newCursor, items) => {
+        case CursoredResultSet(Nil, _) => Future(acc)
+        case CursoredResultSet(_, 0L) => Future(acc)
+        case CursoredResultSet(items, newCursor) => {
           if (page >= n)
             Future(acc :+ items)
           else
@@ -82,9 +82,9 @@ case class CursorPaging[A](pageable: Cursor => Future[(Long, Seq[A])]) extends P
 
     def inner(cursor: Cursor, acc: Seq[Seq[A]], page: Int): Future[Seq[Seq[A]]] = {
       pageable(cursor) flatMap {
-        case (_, Nil) => Future(acc)
-        case (0L, _) => Future(acc)
-        case (newCursor, items) => inner(cursor.copy(value = Some(newCursor)), acc :+items, page + 1)
+        case CursoredResultSet(Nil, _) => Future(acc)
+        case CursoredResultSet(_, 0L) => Future(acc)
+        case CursoredResultSet(items, newCursor) => inner(cursor.copy(value = Some(newCursor)), acc :+items, page + 1)
       } recover {
         case e: TwitterErrorRateLimitExceeded => acc
       }
@@ -95,7 +95,7 @@ case class CursorPaging[A](pageable: Cursor => Future[(Long, Seq[A])]) extends P
 
 }
 
-case class IdPaging[A <: BaseStatus](pageable: Page => Future[Seq[A]]) extends Paging[A] {
+case class IdPaging[A <: CanBeIdentified](pageable: Page => Future[ResultSet[A]]) extends Paging[A] {
 
   import TwitterApi.exec
 
@@ -103,11 +103,10 @@ case class IdPaging[A <: BaseStatus](pageable: Page => Future[Seq[A]]) extends P
 
     def inner(currentPage: Page, acc: Seq[A]): Future[Seq[A]] = {
       pageable(currentPage) flatMap {
-        case Nil => Future(acc.take(n))
-        case items => {
-          val maxId = (items.last.id_str.toLong - 1).toString
-          val newPage = currentPage.copy(maxId = Some(maxId))
-          val newItems = acc ++ items
+        case ResultSet(Nil) => Future(acc.take(n))
+        case resultSet => {
+          val newPage = currentPage.copy(maxId = Some(resultSet.maxId.toString))
+          val newItems = acc ++ resultSet.items
           if (newItems.size >= n)
             Future(newItems.take(n))
           else
@@ -126,11 +125,11 @@ case class IdPaging[A <: BaseStatus](pageable: Page => Future[Seq[A]]) extends P
 
     def inner(currentPage: Page, acc: Seq[A]): Future[Seq[A]] = {
       pageable(currentPage) flatMap {
-        case Nil => Future(acc)
-        case items => {
-          val maxId = (items.last.id_str.toLong - 1).toString
+        case ResultSet(Nil) => Future(acc)
+        case resultSet => {
+          val maxId = resultSet.maxId.toString
           val newPage = currentPage.copy(maxId = Some(maxId))
-          inner(newPage, acc ++ items)
+          inner(newPage, acc ++ resultSet.items)
         }
       } recover {
         case e: TwitterErrorRateLimitExceeded => acc
@@ -146,14 +145,14 @@ case class IdPaging[A <: BaseStatus](pageable: Page => Future[Seq[A]]) extends P
 
     def inner(currentPage: Page, acc: Seq[Seq[A]], page: Int): Future[Seq[Seq[A]]] = {
       pageable(currentPage) flatMap {
-        case Nil => Future(acc)
-        case items => {
-          val maxId = (items.last.id_str.toLong - 1).toString
+        case ResultSet(Nil) => Future(acc)
+        case resultSet => {
+          val maxId = resultSet.maxId.toString
           val newPage = currentPage.copy(maxId = Some(maxId))
           if (page >= n)
-            Future(acc :+ items)
+            Future(acc :+ resultSet.items)
           else
-            inner(newPage, acc :+ items, page + 1)
+            inner(newPage, acc :+ resultSet.items, page + 1)
         }
       } recover {
         case e: TwitterErrorRateLimitExceeded => acc
@@ -167,11 +166,11 @@ case class IdPaging[A <: BaseStatus](pageable: Page => Future[Seq[A]]) extends P
   def pages(countPerPage: Int) = {
     def inner(currentPage: Page, acc: Seq[Seq[A]]): Future[Seq[Seq[A]]] = {
       pageable(currentPage) flatMap {
-        case Nil => Future(acc)
-        case items => {
-          val maxId = (items.last.id_str.toLong - 1).toString
+        case ResultSet(Nil) => Future(acc)
+        case resultSet => {
+          val maxId = resultSet.maxId.toString
           val newPage = currentPage.copy(maxId = Some(maxId))
-          inner(newPage, acc :+ items)
+          inner(newPage, acc :+ resultSet.items)
         }
       } recover {
         case e: TwitterErrorRateLimitExceeded => acc
