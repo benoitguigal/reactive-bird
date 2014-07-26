@@ -4,6 +4,7 @@ import org.scalatest.{Matchers, FlatSpec}
 import spray.json.JsonParser
 import org.joda.time.DateTime
 import me.benoitguigal.twitter.wrappers.defaults._
+import me.benoitguigal.twitter.models.defaults.JsonFormats
 
 
 class DefaultJsonFormatsSpec extends FlatSpec with Matchers {

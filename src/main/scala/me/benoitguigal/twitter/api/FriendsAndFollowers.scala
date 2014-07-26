@@ -3,8 +3,8 @@ package me.benoitguigal.twitter.api
 import me.benoitguigal.twitter.{TwitterApi, version}
 import spray.json.{JsNumber, JsArray, JsonParser}
 import scala.concurrent.Future
+import me.benoitguigal.twitter.models.defaults.JsonFormats
 import me.benoitguigal.twitter.models.{UserId, CursoredResultSet}
-import me.benoitguigal.twitter.models.JsonFormats._
 
 
 trait FriendsAndFollowers {

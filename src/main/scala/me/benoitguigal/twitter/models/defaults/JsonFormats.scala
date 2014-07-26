@@ -1,4 +1,4 @@
-package me.benoitguigal.twitter.models
+package me.benoitguigal.twitter.models.defaults
 
 import spray.json._
 import org.joda.time.DateTime
@@ -45,6 +45,23 @@ object JsonFormats extends DefaultJsonProtocol {
   implicit val statusFormat = jsonFormat11(Status)
 
   implicit val placeFormat = jsonFormat7(Place)
+
+  implicit val directMessageFormat = jsonFormat9(DirectMessage)
+
+  implicit val sourceFormat = jsonFormat5(Source)
+
+  implicit val targetFormat = jsonFormat5(Target)
+
+  implicit val relationshipFormat = jsonFormat2(Relationship)
+
+  implicit val friendshipFormat = jsonFormat1(Friendship)
+
+  implicit val savedSearchFormat = jsonFormat5(SavedSearch)
+
+  implicit val searchMetaDataFormat = jsonFormat9(SearchMetaData)
+
+  implicit val searchResultFormat = jsonFormat2(SearchResults)
+
 
 }
 

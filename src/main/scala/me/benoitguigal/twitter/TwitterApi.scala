@@ -7,29 +7,22 @@ import java.util.concurrent.TimeUnit
 import me.benoitguigal.twitter.api._
 import me.benoitguigal.twitter.models.ModelFactory
 
+
 object TwitterApi {
 
   implicit val system = ActorSystem()
   implicit val exec = system.dispatcher // execution context for futures
   implicit val timeout = Timeout(10, TimeUnit.SECONDS)
 
-/*  def apply(_consumer: Consumer, _token: Token) = new TwitterApi with DefaultWrapperTypes {
-    val consumer: Consumer = _consumer
-    val token: Token = _token
-  }*/
-
 }
 
-trait TwitterApi
+class TwitterApi(val consumer: Consumer, val token: Token)
   extends HttpService
   with ModelFactory
   with Timeline
   with Tweets
   with FriendsAndFollowers
   with Users {
-
-  val consumer: Consumer
-  val token: Token
 
   override def authorizer = Authorizer(consumer, token)
 }

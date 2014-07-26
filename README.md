@@ -6,7 +6,7 @@ Twitter-Spray is a scala library based on Spray and Akka for accessing the Twitt
 ### Features
 - Fully asynchronous (built on top of akka). API calls are wrapped in `scala.concurrent.Future`
 - Support for OAuth sign-in flow
-- Successful calls returns scala wrapper types. Default wrapper types are provided for Tweets, User, Entities and Places but you can provide your owns if necessary.
+- Successful calls returns instances of scala classes. Defaults models are provided but you can also provide your own for convenience
 - Twitter errors are returns as subtypes of `TwitterError`
 - Support for paginating timelines and navigating collections
 
@@ -27,7 +27,7 @@ No stable version yet
 ```
 val consumer = Consumer("your-consumer-key", "your-consumer-secret")
 val token = Token("your-token-key", "your-token-secret")
-val twitterApi = TwitterApi(consumer, token)
+val twitterApi = new TwitterApi(consumer, token)
 val timeline: Future[Seq[Status]] = twitterApi.homeTimeline()
 ```
 
@@ -53,38 +53,21 @@ May the rate limit be hit in the process, the pagination will stop and return al
 successfully retrieved
 
 
-### Providing your own types
+### Providing your own models
 
-It is possible to provide your own wrapper types for Twitter objects.
+It is possible to provide your own models for User, Status, Place, etc. Just override the desired fields from the `ModelFactory` trait.
 
 ```
 class MyStatus
-class MyUser
-```
+implicit myStatusFormat: JsonFormat[MyStatus]
 
-Then define the corresponding JsonFormats
-
-```
-import spray.json._
-object MyJsonFormats extends DefaultJsonProtocol {
- /// your implicit formats go here
-}
-```
-
-Then define implementation of the WrapperTypes and mix it in TwitterApi
-```
-trait MyWrapperTypes extends WrapperTypes {
-  type Status = MyStatus
-  type User = MyUser
-  implicit val statusFormat = MyJsonFormats.statusFormat
-  implicit val userFormat = MyJsonFormats.userFormat
+val twitterApi = new TwitterApi(consumer, token) {
+    override type Status = MyStatus
+    override implicit val statusFormat = myStatusFormat
 }
 
-val twitterApi = new TwitterApi with MyWrapperTypes {
-  val consumer = _consumer
-  val token = _token
-}
 ```
+
 
 ### OAuth flow
 
