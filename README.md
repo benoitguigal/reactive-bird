@@ -33,20 +33,24 @@ val timeline: Future[Seq[Status]] = twitterApi.homeTimeline()
 
 ### Pagination
 
-When working with timelines or large lists of items, you will need to paginate through the result set.
+When working with timelines or large lists of items, you will need to paginate through the result set. The `Paging trait
+uses scala `Stream` under the hood to iterate lazily through result sets. It takes an instance of a pageable `Page => AbstractResultSet[A]`
+as argument. Both pagination with maxId (`MaxIdPage => ResultSet[A]`) and pagination with cursors (`CursorPage => CursoredResultSet`) are supported.
 
 ```
 /// pagination for timelines, working with sinceId and maxId
-val paging = IdPaging(twitterApi.userTimeline(screenName = Some("BGuigal"))(_))
-val tweets: Future[Seq[Status]] = paging.items(500) // retrieves 500 most recent tweets
-val pages: Future[Seq[Seq[Status]] = paging.pages(3, 20) // retrieves 3 pages of 20 tweets
+val pageable: MaxIdPage => Future[ResultSet[Status]] = twitterApi.userTimeline(screenName = Some("BGuigal"))(_)
+val paging = IdPaging(pageable, count = 200, sinceId = Some("sinceId"))
+val tweets: Future[Seq[Status]] = paging.items(500) // retrieves 500 most recent tweets 200 tweets at a time
+val pages: Future[Seq[Seq[Status]] = paging.pages(3) // retrieves the first three pages of 200 tweets
 ```
 
 ```
 /// pagination for followers list, working with cursors
-val paging = CursorPaging(twitterApi.followersIds(screenName = Some("BGuigal"))(_))
-val followersIds: Future[Seq[String]] = paging.items(3000) // retrieves 3000 followers
-val pages: Future[Seq[Seq[String]] = paging.pages(2, 1500) // retrieves 2 pages of 1500 followers
+val pageable: Future[CursorPage => CursoredResultSet[String]] = twitterApi.followersIds(screenName = Some("BGuigal"))(_)
+val paging = CursorPaging(pageable, count = 2000)
+val followersIds: Future[Seq[String]] = paging.items(3000) // retrieves the first 3000 followers 2000 followers at a time
+val pages: Future[Seq[Seq[String]] = paging.pages(2, 1500) // retrieves 2 pages of 2000 followers
 ```
 
 May the rate limit be hit in the process, the pagination will stop and return all the items that were

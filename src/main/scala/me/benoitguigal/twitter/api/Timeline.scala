@@ -15,7 +15,7 @@ trait Timeline {
   def mentionsTimeline(
       trimUser: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[ResultSet[Status]] = {
+      includeEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSet[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
@@ -38,7 +38,7 @@ trait Timeline {
       trimUser: Option[Boolean] = None,
       excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeRts: Option[Boolean] = None)(implicit page : Page = Page(None, None, None)): Future[ResultSet[Status]] = {
+      includeRts: Option[Boolean] = None)(implicit page : MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSet[Status]] = {
 
     require(userId.isDefined || screenName.isDefined)
 
@@ -64,7 +64,7 @@ trait Timeline {
       trimUser: Option[Boolean] = None,
       excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[ResultSet[Status]] = {
+      includeEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSet[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
@@ -85,7 +85,7 @@ trait Timeline {
   def retweetsOfMe(
       trimUser: Option[Boolean] = None,
       includeEntities: Option[Boolean] = None,
-      includeUserEntities: Option[Boolean] = None)(implicit page: Page = Page(None, None, None)): Future[ResultSet[Status]] = {
+      includeUserEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSet[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
