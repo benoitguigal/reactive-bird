@@ -62,6 +62,11 @@ object JsonFormats extends DefaultJsonProtocol {
 
   implicit val searchResultFormat = jsonFormat2(SearchResults)
 
+  implicit val timezoneFormat = jsonFormat3(Timezone)
+
+  implicit val locationFormat = jsonFormat6(Location)
+
+  implicit val settingsFormat = jsonFormat7(Settings)
 
 }
 

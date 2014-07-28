@@ -13,6 +13,9 @@ trait ModelFactory extends CollectionFormats {
   type SavedSearch = defaults.SavedSearch
   type Relationship = defaults.Relationship
   type Place = defaults.Place
+  type Settings = defaults.Settings
+  type Timezone = defaults.Timezone
+  type Location = defaults.Location
 
   implicit val statusFormat = defaults.JsonFormats.statusFormat
   implicit val userFormat = defaults.JsonFormats.userFormat
@@ -22,6 +25,9 @@ trait ModelFactory extends CollectionFormats {
   implicit val searchResultsFormat = defaults.JsonFormats.searchResultFormat
   implicit val relationshipFormat = defaults.JsonFormats.relationshipFormat
   implicit val placeFormat = defaults.JsonFormats.placeFormat
+  implicit val timezone = defaults.JsonFormats.timezoneFormat
+  implicit val locationFormat = defaults.JsonFormats.locationFormat
+  implicit val settingsFormat = defaults.JsonFormats.settingsFormat
 
 }
 

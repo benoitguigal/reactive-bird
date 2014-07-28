@@ -110,4 +110,19 @@ case class SearchMetaData(
     query: String,
     max_id_str: String)
 
+case class Settings(
+    always_use_https: Boolean,
+    discoverable_by_email: Boolean,
+    language: String,
+    screen_name: String,
+    time_zone: Timezone,
+    trend_location: Option[Seq[Location]],
+    use_cookie_personalization: Boolean)
+
+case class Timezone(name: String, tzinfo_name: String, utc_offset: Long)
+
+case class Location(country: String, countryCode: String, name: String, parentid: Long, url: String, woeid: Long)
+
+
+
 
