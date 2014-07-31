@@ -1,11 +1,11 @@
 package me.benoitguigal.twitter.api
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import me.benoitguigal.twitter.{Akka, TwitterErrorRateLimitExceeded}
-import me.benoitguigal.twitter.models.{CursoredResultSet, ResultSet, AbstractResultSet, CanBeIdentified}
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.Duration
-import Stream._
+import me.benoitguigal.twitter.models.{ResultSet, CursoredResultSet, CanBeIdentified}
+import rx.lang.scala.Observable
+import rx.lang.scala.subjects.ReplaySubject
+import scala.util.{Success, Failure}
 
 
 trait Page {
@@ -15,70 +15,109 @@ case class MaxIdPage(count: Option[Int], sinceId: Option[String], maxId: Option[
 case class CursorPage(count: Option[Int], cursor: Option[Long])
 
 
+object Paging {
+  final val MAX_PAGES = 15
+}
+
 trait Paging[A] {
 
   import Akka.exec
+  import Paging._
 
-  val stream: Stream[Seq[A]]
+  val itemsPerPage: Int
+  def pagesAsyncStream(nbPages: Int): Observable[Seq[A]]
 
-  def items(n: Int): Future[Seq[A]] = Future(stream.flatten.take(n).toSeq)
+  def items(n: Int) = {
+    val nbPages = if (n % itemsPerPage == 0) { n / itemsPerPage } else { n / itemsPerPage + 1 }
+    val stream = pagesAsyncStream(nbPages)
+    stream.toSeq.toBlocking.toFuture.map(pages => pages.flatten.take(n))
+  }
+  def items: Future[Seq[A]] = {
+    val stream = pagesAsyncStream(MAX_PAGES)
+    stream.toSeq.toBlocking.toFuture.map(pages => pages.flatten)
+  }
 
-  def items: Future[Seq[A]] = Future(stream.flatten.toSeq)
+  def pages(n: Int): Future[Seq[Seq[A]]] = {
+    val stream = pagesAsyncStream(n)
+    stream.toSeq.toBlocking.toFuture
+  }
 
-  def pages(n: Int): Future[Seq[Seq[A]]] = Future(stream.take(n).toSeq)
-  def pages: Future[Seq[Seq[A]]] = Future(stream.toSeq)
+  def pages: Future[Seq[Seq[A]]] = {
+    val stream = pagesAsyncStream(MAX_PAGES)
+    stream.toSeq.toBlocking.toFuture
+  }
 
 }
 
 
-case class CursorPaging[A <: CanBeIdentified](f: CursorPage => Future[CursoredResultSet[A]], count: Int = 2000) extends Paging[A] {
+case class CursorPaging[A <: CanBeIdentified](f: CursorPage => Future[CursoredResultSet[A]], itemsPerPage: Int = 2000) extends Paging[A] {
 
   import Akka.exec
 
-  val stream: Stream[Seq[A]] = {
-    def loop(cursorPage: CursorPage): Stream[Seq[A]] = {
-      cursorPage.cursor match {
-        case Some(0) => empty
-        case _ => {
-          val future = f(cursorPage) recover {
-            case e: TwitterErrorRateLimitExceeded => CursoredResultSet(Seq.empty[A], 0)
+  def pagesAsyncStream(nbPages: Int): Observable[Seq[A]] = {
+
+    val subject = ReplaySubject[Seq[A]]()
+
+    def loop(cursor: CursorPage, currentPage: Int): Unit = {
+      if (currentPage >= nbPages) {
+        subject.onCompleted()
+      }
+      else {
+        f(cursor) onComplete {
+          case Failure(e: TwitterErrorRateLimitExceeded) => { subject.onCompleted() }
+          case Failure(e) => { subject.onError(e) }
+          case Success(c) => {
+            subject.onNext(c.items)
+            if (c.nextCursor == 0){
+              subject.onCompleted()
+            }
+            else
+              loop(CursorPage(Some(itemsPerPage), Some(c.nextCursor)), nbPages + 1)
           }
-          val result = Await.result(future, Duration(60, TimeUnit.SECONDS))
-          result.items #:: loop(CursorPage(Some(count), Some(result.nextCursor)))
         }
       }
     }
-    loop(CursorPage(Some(count), Some(-1)))
+    loop(CursorPage(Some(itemsPerPage), Some(-1)), 0)
+    subject
   }
 }
 
 
-case class IdPaging[A <: CanBeIdentified](f: MaxIdPage => Future[ResultSet[A]], count: Int = 200, sinceId: Option[String] = None)
+case class IdPaging[A <: CanBeIdentified](f: MaxIdPage => Future[ResultSet[A]], itemsPerPage: Int = 200, sinceId: Option[String] = None)
   extends Paging[A] {
 
   import Akka.exec
 
-  val stream: Stream[Seq[A]] = {
+  def pagesAsyncStream(nbPages: Int) = {
 
-    def loop(page: MaxIdPage): Stream[Seq[A]] = {
-      page match {
-        case MaxIdPage(_, Some(sinceId), Some(maxId)) if (sinceId >= maxId) => empty
-        case page => {
-          val future = f(page) recover {
-            case e: TwitterErrorRateLimitExceeded => ResultSet(Seq.empty[A])
+  val subject = ReplaySubject[Seq[A]]()
+
+  def loop(page: MaxIdPage): Unit = {
+    page match {
+      case MaxIdPage(_, Some(sinceId), Some(maxId)) if (sinceId >= maxId) => subject.onCompleted()
+      case page => {
+        f(page) onComplete {
+          case Failure(e: TwitterErrorRateLimitExceeded) => { subject.onCompleted() }
+          case Failure(e) => { subject.onError(e) }
+          case Success(c) => {
+            if (c.items.nonEmpty){
+              subject.onNext(c.items)
+              loop(MaxIdPage(Some(itemsPerPage), sinceId, Some(c.maxId.toString)))
+            } else {
+             subject.onCompleted()
+            }
           }
-          val result = Await.result(future, Duration(60, TimeUnit.SECONDS))
-          if (result.items.isEmpty)
-            empty
-          else
-            result.items #:: loop(MaxIdPage(Some(count), sinceId, Some(result.maxId.toString)))
         }
       }
     }
+  }
 
-    loop(MaxIdPage(Some(count), sinceId, None))
+  loop(MaxIdPage(Some(itemsPerPage), sinceId, None))
+  subject
   }
 }
+
+
 
 
 

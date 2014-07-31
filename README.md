@@ -33,24 +33,24 @@ val timeline: Future[Seq[Status]] = twitterApi.homeTimeline()
 
 ### Pagination
 
-When working with timelines or large lists of items, you will need to paginate through the result set. The `Paging trait
-uses scala `Stream` under the hood to iterate lazily through result sets. It takes an instance of a pageable `Page => AbstractResultSet[A]`
-as argument. Both pagination with maxId (`MaxIdPage => ResultSet[A]`) and pagination with cursors (`CursorPage => CursoredResultSet`) are supported.
+When working with timelines or large lists of items, you will need to paginate through the result set. The `Paging` trait
+uses scala reactive streams (async Iterable) under the hood to iterate through result sets. It takes an instance of a pageable `Page => AbstractResultSet[A]`
+as argument. Both pagination with maxId (`MaxIdPage => ResultSet[A]`) and pagination with cursors (`CursorPage => CursoredResultSet[A]`) are supported.
 
 ```
 /// pagination for timelines, working with sinceId and maxId
 val pageable: MaxIdPage => Future[ResultSet[Status]] = twitterApi.userTimeline(screenName = Some("BGuigal"))(_)
-val paging = IdPaging(pageable, count = 200, sinceId = Some("sinceId"))
-val tweets: Future[Seq[Status]] = paging.items(500) // retrieves 500 most recent tweets 200 tweets at a time
+val paging = IdPaging(pageable, itemsPerPage = 200, sinceId = Some("sinceId"))
+val tweets: Future[Seq[Status]] = paging.items(500) // retrieves 500 most recent tweets 200 tweets at time
 val pages: Future[Seq[Seq[Status]] = paging.pages(3) // retrieves the first three pages of 200 tweets
 ```
 
 ```
 /// pagination for followers list, working with cursors
-val pageable: Future[CursorPage => CursoredResultSet[String]] = twitterApi.followersIds(screenName = Some("BGuigal"))(_)
+val pageable: Future[CursorPage => CursoredResultSet[UserId]] = twitterApi.followersIds(screenName = Some("BGuigal"))(_)
 val paging = CursorPaging(pageable, count = 2000)
-val followersIds: Future[Seq[String]] = paging.items(3000) // retrieves the first 3000 followers 2000 followers at a time
-val pages: Future[Seq[Seq[String]] = paging.pages(2, 1500) // retrieves 2 pages of 2000 followers
+val followersIds: Future[Seq[UserId]] = paging.items(3000) // retrieves the first 3000 followers 2000 followers at a time
+val pages: Future[Seq[Seq[UserId]] = paging.pages(2, 1500) // retrieves 2 pages of 2000 followers
 ```
 
 May the rate limit be hit in the process, the pagination will stop and return all the items that were

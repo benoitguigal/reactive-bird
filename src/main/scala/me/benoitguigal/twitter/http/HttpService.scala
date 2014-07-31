@@ -11,6 +11,7 @@ import akka.io.IO
 import me.benoitguigal.twitter.Akka
 import me.benoitguigal.twitter.host
 import akka.pattern.ask
+import me.benoitguigal.twitter.TwitterError.errorFilter
 
 
 trait HttpService {
@@ -24,7 +25,7 @@ trait HttpService {
 
   def authorizer: RequestTransformer
 
-  lazy private val pipeline = sendReceiveFut map { authorizer ~> _ }
+  lazy private val pipeline = sendReceiveFut map { authorizer ~> _ ~> errorFilter }
 
   def get(path: String, params: Map[String, String]): Future[HttpResponse] = {
     val uri = Uri.from(path = path, query = Query(params))
