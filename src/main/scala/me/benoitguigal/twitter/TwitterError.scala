@@ -7,6 +7,7 @@ import spray.http.{HttpHeaders, ContentTypes}
 
 abstract class TwitterError extends Exception {
   val message: String
+  override def getMessage = message
 }
 
 object TwitterError {
@@ -54,7 +55,7 @@ object TwitterError {
     case 187    => new TwitterErrorStatusIsADuplicate(message)
     case 215    => new TwitterErrorBadAuthenticationData(message)
     case 231    => new TwitterErrorUserMustVerifyLogin(message)
-    case _      => new TwitterError { val message = "Unknown error" }
+    case _      => TwitterError(message)
   }
 
 
