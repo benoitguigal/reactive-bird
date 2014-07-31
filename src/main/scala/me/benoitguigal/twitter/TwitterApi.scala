@@ -11,7 +11,8 @@ class TwitterApi(val consumer: Consumer, val token: Token)
   with Timeline
   with Tweets
   with FriendsAndFollowers
-  with Users {
+  with Users
+  with DirectMessages {
 
   override def authorizer = Authorizer(consumer, token)
 }
