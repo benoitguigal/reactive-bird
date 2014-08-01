@@ -10,6 +10,7 @@ class TwitterApi(val consumer: Consumer, val token: Token)
   with ModelFactory
   with Timeline
   with Tweets
+  with Search
   with FriendsAndFollowers
   with Users
   with DirectMessages {
