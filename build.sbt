@@ -9,14 +9,14 @@ name := "reactivebird"
 
 version := "1.1-SNAPSHOT"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.3"
 
 resolvers += "spray repo" at "http://repo.spray.io"
 
 libraryDependencies ++= {
-  val sprayV = "1.2.1"
+  val sprayV = "1.3.1"
   Seq(
-    "com.typesafe.akka"  %% "akka-actor"     % "2.2.3",
+    "com.typesafe.akka"  %% "akka-actor"     % "2.3.0",
     "joda-time"          %  "joda-time"      % "2.3",
     "org.joda"           % "joda-convert"    % "1.2",
     "io.spray"           % "spray-http"      % sprayV,

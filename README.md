@@ -12,7 +12,7 @@ Reactive Bird is a scala library based on Spray and Akka for accessing the Twitt
 
 ### Get Reactive Bird
 
-ReactiveBird for scala 2.10.2 is available on Sonatype.
+ReactiveBird for scala 2.10.3 is available on Sonatype.
 
 ```
 libraryDependencies += "org.reactivebird" %% "reactivebird" % "1.1-SNAPSHOT"
