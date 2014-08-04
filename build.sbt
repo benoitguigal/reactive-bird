@@ -1,10 +1,11 @@
 import SonatypeKeys._
 
-xerial.sbt.Sonatype.sonatypeSettings
+// Import default settings. This changes `publishTo` settings to use the Sonatype repository and add several commands for publishing.
+sonatypeSettings
 
-organization := "me.benoitguigal"
+organization := "org.reactivebird"
 
-name := "twitter"
+name := "reactivebird"
 
 version := "1.1-SNAPSHOT"
 
@@ -42,7 +43,7 @@ publishTo := {
 pomIncludeRepository := { _ => false }
 
 pomExtra := (
-  <url>https://github.com/benoitguigal/twitter-spray</url>
+  <url>https://github.com/benoitguigal/reactive-bird</url>
   <licenses>
     <license>
       <name>BSD-style</name>
@@ -51,8 +52,8 @@ pomExtra := (
     </license>
   </licenses>
   <scm>
-    <url>git@github.com:benoitguigal/twitter-spray.git</url>
-    <connection>scm:git:git@github.com:benoitguigal/twitter-spray.git</connection>
+    <url>git@github.com:benoitguigal/reactive-bird.git</url>
+    <connection>scm:git:git@github.com:benoitguigal/reactive-bird.git</connection>
   </scm>
   <developers>
     <developer>

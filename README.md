@@ -1,7 +1,7 @@
-## Twitter-Spray
+## Reactive Bird
 
 ***
-Twitter-Spray is a scala library based on Spray and Akka for accessing the Twitter REST APIv1.1. Support for OAuth. The streaming API will be added in the future.
+Reactive Bird is a scala library based on Spray and Akka for accessing the Twitter REST APIv1.1. Support for OAuth. The streaming API will be added in the future.
 
 ### Features
 - Fully asynchronous (built on top of akka). API calls are wrapped in `scala.concurrent.Future`
@@ -10,12 +10,12 @@ Twitter-Spray is a scala library based on Spray and Akka for accessing the Twitt
 - Twitter errors are returns as subtypes of `TwitterError`
 - Support for paginating timelines and navigating collections
 
-### Get Twitter-Spray
+### Get Reactive Bird
 
-Twitter-Spray for scala 2.10.2 is available on Sonatype.
+ReactiveBird for scala 2.10.2 is available on Sonatype.
 
 ```
-libraryDependencies += "me.benoitguigal" %% "twitter" % "1.1-SNAPSHOT"
+libraryDependencies += "org.reactivebird" %% "reactivebird" % "1.1-SNAPSHOT"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 ```
@@ -76,7 +76,7 @@ val twitterApi = new TwitterApi(consumer, token) {
 ### OAuth flow
 
 ```
-import me.benoitguigal.twitter.oauth.OAuthHandler
+import org.reactivebird.oauth.OAuthHandler
 
 val consumer = Consumer("your-consumer-key", "your-consumer-secret")
 val auth = OAuthHandler(consumer)
@@ -94,4 +94,4 @@ val accessToken = auth.accessToken("oauth_token", "oauth_verifier")
 
 
 ### License
-Twitter-spray is free software licensed under the MIT/X11 license. Details provided in the LICENSE file.
+Reactive Bird is free software licensed under the MIT/X11 license. Details provided in the LICENSE file.

@@ -12,4 +12,4 @@ target
 .idea_modules
 
 # Inte test file
-src/test/scala/me/benoitguigal/twitter/TwitterSpec.scala
+src/test/scala/org.reactivebird/TwitterSpec.scala
