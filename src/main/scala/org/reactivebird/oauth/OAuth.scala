@@ -12,9 +12,12 @@ object OAuth {
 
   implicit class CanBeAuthorizedHttpRequest(request: HttpRequest) {
 
+    def timestampProvider = SystemTimestamp()
+    def nonceProvider = SystemNonce()
+
     def authorize(consumer: Consumer, token: Token): HttpRequest = {
-      val timestamp = SystemTimestamp()
-      val nonce = SystemNonce()
+      val timestamp = timestampProvider
+      val nonce = nonceProvider
 
       val requestUriParams = request.uri.query.toMap
 
@@ -58,8 +61,8 @@ object OAuth {
 
     def authorize(consumer: Consumer, oauthCallback: String): HttpRequest = {
 
-      val timestamp = SystemTimestamp()
-      val nonce = SystemNonce()
+      val timestamp = timestampProvider
+      val nonce = nonceProvider
 
       val oauthParams = Map(
         "oauth_consumer_key" -> consumer.key,

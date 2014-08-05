@@ -4,6 +4,7 @@ import org.scalatest.{Matchers, FlatSpec}
 import spray.json.JsonParser
 import org.joda.time.DateTime
 import org.reactivebird.models.defaults._
+import org.reactivebird.models.defaults.JsonFormats._
 
 
 class DefaultJsonFormatsSpec extends FlatSpec with Matchers {
