@@ -13,7 +13,8 @@ class TwitterApi(val consumer: Consumer, val token: Token)
   with Search
   with FriendsAndFollowers
   with Users
-  with DirectMessages {
+  with DirectMessages
+  with Favorites {
 
   override def authorizer = Authorizer(consumer, token)
 }
