@@ -2,7 +2,7 @@ package org.reactivebird.api
 
 import org.reactivebird.{Akka, TwitterApi, version}
 import org.joda.time.DateTime
-import spray.json.JsonParser
+import spray.json.{JsArray, DeserializationException, JsonParser}
 
 
 trait Search {
@@ -31,7 +31,10 @@ trait Search {
       page.maxId map ("max_id" -> _)).flatten.toMap
 
     get(s"/$version/search/tweets.json", params) map { r =>
-      JsonParser(r.entity.toString).convertTo[Seq[Status]]
+      JsonParser(r.entity.asString).asJsObject.getFields("statuses") match {
+        case Seq(JsArray(statuses)) => statuses map (_.convertTo[Status])
+        case _ => throw new DeserializationException("Failed parsing sequence of tweets")
+      }
     }
 
   }
