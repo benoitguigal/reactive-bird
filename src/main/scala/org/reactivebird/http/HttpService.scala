@@ -14,9 +14,30 @@ import akka.pattern.ask
 import org.reactivebird.TwitterError.errorFilter
 
 
+
+object HttpService {
+
+  import Akka.exec
+
+  private[this] def retry[T](noTimes: Int)(block: =>Future[T]): Future[T] = {
+    val ns = (1 to noTimes).iterator
+    val attempts = ns.map(_ => () => block)
+    attempts.reduceLeft { (a, b) =>
+      () => a() recoverWith { case _ => b() }
+    }()
+  }
+
+  private[http] def withRetry(noTimes: Int)(pipeline: SendReceive): SendReceive = {
+    request => {
+      retry(noTimes)(pipeline(request))
+    }
+  }
+}
+
 trait HttpService {
 
   import Akka.{system, exec, timeout}
+  import HttpService.withRetry
 
   lazy private val sendReceiveFut = for (
     Http.HostConnectorInfo(connector, _) <-
@@ -25,7 +46,13 @@ trait HttpService {
 
   def authorizer: RequestTransformer
 
-  lazy private val pipeline = sendReceiveFut map { authorizer ~> _ ~> errorFilter }
+  val retryCount: Int
+
+  lazy private val pipeline = sendReceiveFut map { sendReceive =>
+    withRetry(retryCount) {
+      authorizer ~> sendReceive ~> errorFilter
+    }
+  }
 
   def get(path: String, params: Map[String, String]): Future[HttpResponse] = {
     val uri = Uri.from(path = path, query = Query(params))

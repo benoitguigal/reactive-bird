@@ -7,7 +7,7 @@ import scala.concurrent.Future
 import org.reactivebird.{scheme, host}
 
 
-case class OAuthHandler(consumer: Consumer) {
+case class OAuthHandler(consumer: Consumer, _retryCount: Int = 1) {
 
   import Akka.exec
 
@@ -17,6 +17,7 @@ case class OAuthHandler(consumer: Consumer) {
 
   def requestToken(oauthCallback: String): Future[RequestToken] = {
     val httpService = new HttpService {
+      val retryCount: Int = _retryCount
       def authorizer = Authorizer(consumer, oauthCallback)
     }
     httpService.post(temporaryCredentialsRequestUri, Map()) map { r =>
@@ -36,6 +37,7 @@ case class OAuthHandler(consumer: Consumer) {
 
   def accessToken(tokenKey: String, oauthVerifier: String): Future[AccessToken] = {
     val httpService = new HttpService {
+      val retryCount: Int = _retryCount
       def authorizer = Authorizer(consumer, Token(tokenKey, None))
     }
     val content = s"oauth_verifier=$oauthVerifier"

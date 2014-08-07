@@ -5,7 +5,7 @@ import org.reactivebird.api._
 import org.reactivebird.models.ModelFactory
 
 
-class TwitterApi(val consumer: Consumer, val token: Token)
+class TwitterApi(val consumer: Consumer, val token: Token, val retryCount: Int = 1)
   extends HttpService
   with ModelFactory
   with Timeline
