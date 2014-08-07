@@ -11,9 +11,9 @@ import scala.concurrent.duration.Duration
 import java.util.concurrent.TimeUnit
 
 
-class HttpServiceSpec extends FlatSpec with MockitoSugar with Matchers {
+class RetryingSpec extends FlatSpec with MockitoSugar with Matchers {
 
-  import HttpService._
+ import Retrying._
 
   it should "retry calls and throw if none succeeds" in {
     val sendReceive = mock[SendReceive]

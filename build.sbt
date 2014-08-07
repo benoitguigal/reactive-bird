@@ -24,6 +24,7 @@ libraryDependencies ++= {
     "io.spray"           % "spray-util"      % sprayV,
     "io.spray"           % "spray-client"    % sprayV,
     "io.spray"           % "spray-can"       % sprayV,
+    "io.spray"           % "spray-caching"   % sprayV,
     "com.netflix.rxjava" % "rxjava-scala"    % "0.19.6",
     "io.spray"           %% "spray-json"     % "1.2.6",
     "org.scalatest"      % "scalatest_2.10"  % "2.1.3" % "test",
