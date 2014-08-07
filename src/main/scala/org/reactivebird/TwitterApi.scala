@@ -17,6 +17,6 @@ class TwitterApi(consumer: Consumer, token: Token, val retryCount: Int = 1, val 
   with DirectMessages
   with Favorites {
 
-  override def authorizer = Authorizer(consumer, token)
+  override protected def authorizer = Authorizer(consumer, token)
 }
 

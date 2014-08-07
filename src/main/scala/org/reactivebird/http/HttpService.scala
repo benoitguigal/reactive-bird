@@ -23,7 +23,7 @@ trait HttpService {
     IO(Http) ? Http.HostConnectorSetup(host, port = 443, sslEncryption = true)
   ) yield (sendReceive(connector))
 
-  def authorizer: RequestTransformer
+  protected def authorizer: RequestTransformer
 
   protected def getPipeline = sendReceiveFut map { sendReceive =>
     authorizer ~> sendReceive ~> errorFilter

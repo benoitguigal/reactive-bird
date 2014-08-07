@@ -23,7 +23,7 @@ trait Caching extends HttpService {
 
   import Caching._
 
-  val cache: Cache[HttpResponse] = LruCache()
+  private val cache: Cache[HttpResponse] = LruCache()
   val cacheResult: Boolean
 
   override protected def getPipeline = {
