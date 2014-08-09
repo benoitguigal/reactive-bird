@@ -2,7 +2,7 @@ package org.reactivebird.api
 
 import play.api.libs.iteratee._
 import scala.concurrent.Future
-import org.reactivebird.models.{ResultSet, CursoredResultSet, CanBeIdentified}
+import org.reactivebird.models.{ResultSet, ResultSetWithMaxId, ResultSetWithCursor, CanBeIdentified}
 import org.reactivebird.{Akka, TwitterErrorRateLimitExceeded}
 
 
@@ -11,6 +11,7 @@ trait Page {
 }
 case class MaxIdPage(count: Option[Int], sinceId: Option[String], maxId: Option[String]) extends Page
 case class CursorPage(count: Option[Int], cursor: Option[Long])
+
 
 
 trait Paging[A] {
@@ -66,7 +67,7 @@ trait Paging[A] {
 
 }
 
-case class CursorPaging[A <: CanBeIdentified](f: CursorPage => Future[CursoredResultSet[A]], itemsPerPage: Int = 2000) extends Paging[A] {
+case class CursorPaging[A](pageable: CursorPage => Future[ResultSetWithCursor[A]], itemsPerPage: Int = 2000) extends Paging[A] {
 
   import Akka.exec
 
@@ -75,8 +76,8 @@ case class CursorPaging[A <: CanBeIdentified](f: CursorPage => Future[CursoredRe
     if (currentPage.cursor.get == 0)
       Future.successful[Option[(CursorPage, Seq[A])]]{ None }
     else {
-      f(currentPage) map {
-        case CursoredResultSet(items, nextCursor) => Some(CursorPage(Some(itemsPerPage), Some(nextCursor)) -> items)
+      pageable(currentPage) map {
+        case ResultSetWithCursor(items, nextCursor) => Some(CursorPage(Some(itemsPerPage), Some(nextCursor)) -> items)
       } recoverWith {
         case e: TwitterErrorRateLimitExceeded => Future.successful[Option[(CursorPage, Seq[A])]]{ None }
       }
@@ -86,7 +87,7 @@ case class CursorPaging[A <: CanBeIdentified](f: CursorPage => Future[CursoredRe
 
 }
 
-case class IdPaging[A <: CanBeIdentified](f: MaxIdPage => Future[ResultSet[A]], itemsPerPage: Int = 200, sinceId: Option[String] = None)
+case class IdPaging[A <: CanBeIdentified](pageable: MaxIdPage => Future[ResultSetWithMaxId[A]], itemsPerPage: Int = 200, sinceId: Option[String] = None)
   extends Paging[A] {
 
   import Akka.exec
@@ -96,7 +97,7 @@ case class IdPaging[A <: CanBeIdentified](f: MaxIdPage => Future[ResultSet[A]], 
     currentPage match {
       case MaxIdPage(_, Some(sinceId), Some(maxId)) if (sinceId >= maxId) => Future.successful[Option[(MaxIdPage, Seq[A])]]{ None }
       case page =>
-        f(page) map { r =>
+        pageable(page) map { r =>
           if (r.items.nonEmpty)
             Some((MaxIdPage(Some(itemsPerPage), sinceId, Some(r.maxId.toString)), r.items))
           else

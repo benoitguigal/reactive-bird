@@ -3,7 +3,7 @@ package org.reactivebird.api
 import spray.json.JsonParser
 import scala.concurrent.Future
 import org.reactivebird.{TwitterApi, Akka, version}
-import org.reactivebird.models.ResultSet
+import org.reactivebird.models.{ResultSetWithMaxId}
 
 
 
@@ -15,7 +15,7 @@ trait Timeline {
   def mentionsTimeline(
       trimUser: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSet[Status]] = {
+      includeEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSetWithMaxId[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
@@ -27,7 +27,7 @@ trait Timeline {
     ).flatten.toMap
 
     get(s"/$version/statuses/mentions_timeline.json", params) map { r =>
-      new ResultSet(JsonParser(r.entity.asString).convertTo[Seq[Status]])
+      ResultSetWithMaxId(JsonParser(r.entity.asString).convertTo[Seq[Status]])
     }
   }
 
@@ -38,7 +38,7 @@ trait Timeline {
       trimUser: Option[Boolean] = None,
       excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeRts: Option[Boolean] = None)(implicit page : MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSet[Status]] = {
+      includeRts: Option[Boolean] = None)(implicit page : MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSetWithMaxId[Status]] = {
 
     require(userId.isDefined || screenName.isDefined)
 
@@ -55,7 +55,7 @@ trait Timeline {
     ).flatten.toMap
 
     get(s"/$version/statuses/user_timeline.json", params) map { r =>
-      new ResultSet(JsonParser(r.entity.asString).convertTo[Seq[Status]])
+      ResultSetWithMaxId(JsonParser(r.entity.asString).convertTo[Seq[Status]])
     }
 
   }
@@ -64,7 +64,7 @@ trait Timeline {
       trimUser: Option[Boolean] = None,
       excludeReplies: Option[Boolean] = None,
       contributorDetails: Option[Boolean] = None,
-      includeEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSet[Status]] = {
+      includeEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSetWithMaxId[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
@@ -77,7 +77,7 @@ trait Timeline {
     ).flatten.toMap
 
     get(s"/$version/statuses/home_timeline.json", params) map { r =>
-      new ResultSet(JsonParser(r.entity.asString).convertTo[Seq[Status]])
+      ResultSetWithMaxId(JsonParser(r.entity.asString).convertTo[Seq[Status]])
     }
 
   }
@@ -85,7 +85,7 @@ trait Timeline {
   def retweetsOfMe(
       trimUser: Option[Boolean] = None,
       includeEntities: Option[Boolean] = None,
-      includeUserEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSet[Status]] = {
+      includeUserEntities: Option[Boolean] = None)(implicit page: MaxIdPage = MaxIdPage(None, None, None)): Future[ResultSetWithMaxId[Status]] = {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
@@ -97,7 +97,7 @@ trait Timeline {
     ).flatten.toMap
 
     get(s"/$version/statuses/retweets_of_me.json", params) map { r =>
-      new ResultSet(JsonParser(r.entity.asString).convertTo[Seq[Status]])
+      ResultSetWithMaxId(JsonParser(r.entity.asString).convertTo[Seq[Status]])
     }
 
   }

@@ -38,12 +38,12 @@ ReactiveBird implements most of the endpoints defined in the [Twitter API docume
 ## Pagination
 
 When working with timelines or large lists of items, you will need to paginate through the result set. The `Paging` trait
-uses scala reactive streams (async Iterable) under the hood to iterate through result sets. It takes an instance of a pageable `Page => AbstractResultSet[A]`
-as argument. Both pagination with maxId (`MaxIdPage => ResultSet[A]`) and pagination with cursors (`CursorPage => CursoredResultSet[A]`) are supported.
+uses Play Enumerator under the hood to iterate through result sets. It takes a pageable `Page => ResultSet[A]`
+as argument. Both pagination with maxId (`MaxIdPage => ResultSetWithMaxId[A]`) and pagination with cursors (`CursorPage => ResultSetWithCursor[A]`) are supported.
 
 ```scala
 /// pagination for timelines, working with sinceId and maxId
-val pageable: MaxIdPage => Future[ResultSet[Status]] = twitterApi.userTimeline(screenName = Some("BGuigal"))(_)
+val pageable: MaxIdPage => Future[ResultSetWithMaxId[Status]] = twitterApi.userTimeline(screenName = Some("BGuigal"))(_)
 val paging = IdPaging(pageable, itemsPerPage = 200, sinceId = Some("sinceId"))
 val tweets: Future[Seq[Status]] = paging.items(500) // retrieves 500 most recent tweets 200 tweets at time
 val pages: Future[Seq[Seq[Status]]] = paging.pages(3) // retrieves the first three pages of 200 tweets
@@ -51,7 +51,7 @@ val pages: Future[Seq[Seq[Status]]] = paging.pages(3) // retrieves the first thr
 
 ```scala
 /// pagination for followers list, working with cursors
-val pageable: Future[CursorPage => CursoredResultSet[UserId]] = twitterApi.followersIds(screenName = Some("BGuigal"))(_)
+val pageable: Future[CursorPage => ResultSetWithCursor[UserId]] = twitterApi.followersIds(screenName = Some("BGuigal"))(_)
 val paging = CursorPaging(pageable, count = 2000)
 val followersIds: Future[Seq[UserId]] = paging.items(3000) // retrieves the first 3000 followers 2000 followers at a time
 val pages: Future[Seq[Seq[UserId]]] = paging.pages(2, 1500) // retrieves 2 pages of 2000 followers

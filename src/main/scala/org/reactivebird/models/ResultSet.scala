@@ -7,13 +7,15 @@ trait CanBeIdentified {
 
 case class UserId(id: Long) extends CanBeIdentified
 
-trait AbstractResultSet[A <: CanBeIdentified] {
+
+
+trait ResultSet[A] {
   val items: Seq[A]
-  def maxId = items.last.id - 1
-  def ids = items map (_.id)
 }
 
-case class ResultSet[A <: CanBeIdentified](items: Seq[A]) extends AbstractResultSet[A]
+case class ResultSetWithMaxId[A <: CanBeIdentified](items: Seq[A]) extends ResultSet[A] {
+  def maxId = items.last.id - 1
+}
 
-case class CursoredResultSet[A <: CanBeIdentified](items: Seq[A], val nextCursor: Long) extends AbstractResultSet[A]
+case class ResultSetWithCursor[A](items: Seq[A], nextCursor: Long) extends ResultSet[A]
 

@@ -3,7 +3,7 @@ package org.reactivebird.api
 import org.reactivebird.{Akka, version, TwitterApi}
 import spray.json.{JsNumber, JsArray, JsonParser}
 import scala.concurrent.Future
-import org.reactivebird.models.{UserId, CursoredResultSet}
+import org.reactivebird.models.{UserId, ResultSetWithCursor}
 
 
 trait FriendsAndFollowers {
@@ -14,7 +14,7 @@ trait FriendsAndFollowers {
   def friendsIds(
       userId: Option[String],
       screenName: Option[String] = None,
-      stringifyIds: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[CursoredResultSet[UserId]] = {
+      stringifyIds: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[ResultSetWithCursor[UserId]] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -30,7 +30,7 @@ trait FriendsAndFollowers {
       json.asJsObject.getFields("next_cursor","ids") match {
         case Seq(JsNumber(nextCursor), JsArray(ids)) => {
           val friendIds = ids.collect { case JsNumber(id) => UserId(id.toLong) }
-          new CursoredResultSet(friendIds, nextCursor.toLong)
+          ResultSetWithCursor(friendIds, nextCursor.toLong)
         }
         case _ => throw new Exception("Failed parsing friends list")
       }
@@ -41,7 +41,7 @@ trait FriendsAndFollowers {
   def followersIds(
       userId: Option[String] = None,
       screenName: Option[String] = None,
-      stringifyIds: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[CursoredResultSet[UserId]] = {
+      stringifyIds: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[ResultSetWithCursor[UserId]] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -57,7 +57,7 @@ trait FriendsAndFollowers {
       json.asJsObject.getFields("next_cursor", "ids") match {
         case Seq(JsNumber(nextCursor), JsArray(ids)) => {
           val followerIds = ids collect { case JsNumber(id) => UserId(id.toLong) }
-          new CursoredResultSet(followerIds, nextCursor.toLong)
+          ResultSetWithCursor(followerIds, nextCursor.toLong)
         }
         case _ => throw new Exception("Failed parsing followers list")
       }
@@ -65,7 +65,7 @@ trait FriendsAndFollowers {
 
   }
 
-  def friendshipsIncoming(stringifyIds: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[CursoredResultSet[UserId]] = {
+  def friendshipsIncoming(stringifyIds: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[ResultSetWithCursor[UserId]] = {
 
     val params = Seq(
         page.cursor map ("cursor" -> _.toString),
@@ -76,14 +76,14 @@ trait FriendsAndFollowers {
       json.asJsObject.getFields("next_cursor", "ids") match {
         case Seq(JsNumber(nextCursor), JsArray(ids)) => {
           val friendIds = ids collect { case JsNumber(id) => UserId(id.toLong) }
-          new CursoredResultSet(friendIds, nextCursor.toLong)
+          ResultSetWithCursor(friendIds, nextCursor.toLong)
         }
         case _ => throw new Exception("Failed parsing incoming friendships list")
       }
     }
   }
 
-  def friendshipsOutgoing(stringifyIds: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[CursoredResultSet[UserId]] = {
+  def friendshipsOutgoing(stringifyIds: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[ResultSetWithCursor[UserId]] = {
 
     val params = Seq(
       page.cursor map ("cursor" -> _.toString),
@@ -94,7 +94,7 @@ trait FriendsAndFollowers {
       json.asJsObject.getFields("next_cursor", "ids") match {
         case Seq(JsNumber(nextCursor), JsArray(ids)) => {
           val friendIds = ids collect { case JsNumber(id) => UserId(id.toLong) }
-          new CursoredResultSet(friendIds, nextCursor.toLong)
+          ResultSetWithCursor(friendIds, nextCursor.toLong)
         }
         case _ => throw new Exception("Failed parsing outgoing friendships list")
       }
@@ -181,7 +181,7 @@ trait FriendsAndFollowers {
       userId: Option[String],
       screenName: Option[String] = None,
       skipStatus: Option[Boolean] = None,
-      includeUserEntities: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[CursoredResultSet[User]] = {
+      includeUserEntities: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[ResultSetWithCursor[User]] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -196,7 +196,7 @@ trait FriendsAndFollowers {
       get(s"/$version/friends/list.json", params) map { r =>
         val json = JsonParser(r.entity.asString)
         json.asJsObject.getFields("next_cursor", "users") match {
-          case Seq(JsNumber(nextCursor), users) => new CursoredResultSet(users.convertTo[Seq[User]], nextCursor.toLong)
+          case Seq(JsNumber(nextCursor), users) => ResultSetWithCursor(users.convertTo[Seq[User]], nextCursor.toLong)
           case _ => throw new Exception("Failed parsing friends list")
         }
       }
@@ -206,7 +206,7 @@ trait FriendsAndFollowers {
        userId: Option[String],
        screenName: Option[String] = None,
        skipStatus: Option[Boolean] = None,
-       includeUserEntities: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[CursoredResultSet[User]] = {
+       includeUserEntities: Option[Boolean] = None)(implicit page: CursorPage = CursorPage(None, None)): Future[ResultSetWithCursor[User]] = {
 
     require(userId.nonEmpty || screenName.nonEmpty, "Either a screen_name or a user_id must be provided.")
 
@@ -222,7 +222,7 @@ trait FriendsAndFollowers {
     get(s"/$version/followers/list.json", params) map { r =>
       val json = JsonParser(r.entity.asString)
       json.asJsObject.getFields("next_cursor", "users") match {
-        case Seq(JsNumber(nextCursor), users) => new CursoredResultSet(users.convertTo[Seq[User]], nextCursor.toLong)
+        case Seq(JsNumber(nextCursor), users) => ResultSetWithCursor(users.convertTo[Seq[User]], nextCursor.toLong)
         case _ => throw new Exception("Failed parsing followers list")
       }
     }
