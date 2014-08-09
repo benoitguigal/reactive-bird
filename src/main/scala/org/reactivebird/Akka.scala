@@ -9,6 +9,6 @@ object Akka {
 
   implicit val system = ActorSystem()
   implicit val exec = system.dispatcher // execution context for futures
-  implicit val timeout = Timeout(10, TimeUnit.SECONDS)
+  implicit val timeout = Timeout(60, TimeUnit.SECONDS)
 
 }

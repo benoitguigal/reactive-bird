@@ -1,11 +1,9 @@
 package org.reactivebird.api
 
+import play.api.libs.iteratee._
 import scala.concurrent.Future
-import org.reactivebird.{Akka, TwitterErrorRateLimitExceeded}
 import org.reactivebird.models.{ResultSet, CursoredResultSet, CanBeIdentified}
-import rx.lang.scala.Observable
-import rx.lang.scala.subjects.ReplaySubject
-import scala.util.{Success, Failure}
+import org.reactivebird.{Akka, TwitterErrorRateLimitExceeded}
 
 
 trait Page {
@@ -15,107 +13,101 @@ case class MaxIdPage(count: Option[Int], sinceId: Option[String], maxId: Option[
 case class CursorPage(count: Option[Int], cursor: Option[Long])
 
 
-object Paging {
-  final val MAX_PAGES = 15
-}
-
 trait Paging[A] {
 
   import Akka.exec
-  import Paging._
 
-  val itemsPerPage: Int
-  def pagesAsyncStream(nbPages: Int): Observable[Seq[A]]
+  val enumerator: Enumerator[Seq[A]]
 
-  def items(n: Int) = {
-    val nbPages = if (n % itemsPerPage == 0) { n / itemsPerPage } else { n / itemsPerPage + 1 }
-    val stream = pagesAsyncStream(nbPages)
-    stream.toSeq.toBlocking.toFuture.map(pages => pages.flatten.take(n))
-  }
   def items: Future[Seq[A]] = {
-    val stream = pagesAsyncStream(MAX_PAGES)
-    stream.toSeq.toBlocking.toFuture.map(pages => pages.flatten)
+    val iterator = Iteratee.fold[Seq[A], Seq[A]](Seq.empty[A]){ (acc, elt) => acc ++ elt }
+    enumerator run iterator
   }
 
-  def pages(n: Int): Future[Seq[Seq[A]]] = {
-    val stream = pagesAsyncStream(n)
-    stream.toSeq.toBlocking.toFuture
+  def items(n: Int): Future[Seq[A]] = {
+    enumerator run concateneN(n)
   }
 
   def pages: Future[Seq[Seq[A]]] = {
-    val stream = pagesAsyncStream(MAX_PAGES)
-    stream.toSeq.toBlocking.toFuture
+    val iterator = Iteratee.fold[Seq[A], Seq[Seq[A]]](Seq.empty[Seq[A]]){ (acc, elt) => acc :+ elt }
+    enumerator run iterator
   }
 
-}
+  def pages(n: Int): Future[Seq[Seq[A]]] = {
+    enumerator run takeN(n)
+  }
 
+
+  private[this] def concateneN(n: Int): Iteratee[Seq[A], Seq[A]] = {
+    def step(idx: Int, acc: Seq[A])(i: Input[Seq[A]]): Iteratee[Seq[A], Seq[A]] = i match {
+      case Input.EOF | Input.Empty => Done(acc, Input.EOF)
+      case Input.El(e) =>
+        if (idx < n)
+          Cont[Seq[A], Seq[A]](i => step(idx + e.size, acc ++ e)(i))
+        else
+          Done(acc.take(n), Input.EOF)
+    }
+    Cont[Seq[A], Seq[A]](i => step(0, Seq.empty[A])(i))
+  }
+
+
+  private[this] def takeN(n: Int): Iteratee[Seq[A], Seq[Seq[A]]] = {
+    def step(idx: Int, acc: Seq[Seq[A]])(i: Input[Seq[A]]): Iteratee[Seq[A], Seq[Seq[A]]] = i match {
+      case Input.EOF | Input.Empty => Done(acc, Input.EOF)
+      case Input.El(e) =>
+        if (idx < n)
+          Cont[Seq[A], Seq[Seq[A]]](i => step(idx + 1, acc :+ e)(i))
+        else
+          Done(acc, Input.EOF)
+    }
+    Cont[Seq[A], Seq[Seq[A]]](i => step(0, Seq.empty[Seq[A]])(i))
+  }
+
+
+}
 
 case class CursorPaging[A <: CanBeIdentified](f: CursorPage => Future[CursoredResultSet[A]], itemsPerPage: Int = 2000) extends Paging[A] {
 
   import Akka.exec
 
-  def pagesAsyncStream(nbPages: Int): Observable[Seq[A]] = {
-
-    val subject = ReplaySubject[Seq[A]]()
-
-    def loop(cursor: CursorPage, currentPage: Int): Unit = {
-      if (currentPage >= nbPages) {
-        subject.onCompleted()
-      }
-      else {
-        f(cursor) onComplete {
-          case Failure(e: TwitterErrorRateLimitExceeded) => { subject.onCompleted() }
-          case Failure(e) => { subject.onError(e) }
-          case Success(c) => {
-            subject.onNext(c.items)
-            if (c.nextCursor == 0){
-              subject.onCompleted()
-            }
-            else
-              loop(CursorPage(Some(itemsPerPage), Some(c.nextCursor)), nbPages + 1)
-          }
-        }
+  private val seedPage = CursorPage(Some(itemsPerPage), Some(-1))
+  val enumerator: Enumerator[Seq[A]] = Enumerator.unfoldM[CursorPage, Seq[A]](seedPage){ currentPage =>
+    if (currentPage.cursor.get == 0)
+      Future.successful[Option[(CursorPage, Seq[A])]]{ None }
+    else {
+      f(currentPage) map {
+        case CursoredResultSet(items, nextCursor) => Some(CursorPage(Some(itemsPerPage), Some(nextCursor)) -> items)
+      } recoverWith {
+        case e: TwitterErrorRateLimitExceeded => Future.successful[Option[(CursorPage, Seq[A])]]{ None }
       }
     }
-    loop(CursorPage(Some(itemsPerPage), Some(-1)), 0)
-    subject
-  }
-}
 
+  }
+
+}
 
 case class IdPaging[A <: CanBeIdentified](f: MaxIdPage => Future[ResultSet[A]], itemsPerPage: Int = 200, sinceId: Option[String] = None)
   extends Paging[A] {
 
   import Akka.exec
 
-  def pagesAsyncStream(nbPages: Int) = {
-
-  val subject = ReplaySubject[Seq[A]]()
-
-  def loop(page: MaxIdPage): Unit = {
-    page match {
-      case MaxIdPage(_, Some(sinceId), Some(maxId)) if (sinceId >= maxId) => subject.onCompleted()
-      case page => {
-        f(page) onComplete {
-          case Failure(e: TwitterErrorRateLimitExceeded) => { subject.onCompleted() }
-          case Failure(e) => { subject.onError(e) }
-          case Success(c) => {
-            if (c.items.nonEmpty){
-              subject.onNext(c.items)
-              loop(MaxIdPage(Some(itemsPerPage), sinceId, Some(c.maxId.toString)))
-            } else {
-             subject.onCompleted()
-            }
-          }
+  private val seedPage = MaxIdPage(Some(itemsPerPage), sinceId, None)
+  override val enumerator: Enumerator[Seq[A]] = Enumerator.unfoldM[MaxIdPage, Seq[A]](seedPage){ currentPage =>
+    currentPage match {
+      case MaxIdPage(_, Some(sinceId), Some(maxId)) if (sinceId >= maxId) => Future.successful[Option[(MaxIdPage, Seq[A])]]{ None }
+      case page =>
+        f(page) map { r =>
+          if (r.items.nonEmpty)
+            Some((MaxIdPage(Some(itemsPerPage), sinceId, Some(r.maxId.toString)), r.items))
+          else
+            Option.empty[(MaxIdPage, Seq[A])]
+        } recoverWith {
+          case e: TwitterErrorRateLimitExceeded => Future.successful[Option[(MaxIdPage, Seq[A])]]{ None }
         }
-      }
     }
   }
-
-  loop(MaxIdPage(Some(itemsPerPage), sinceId, None))
-  subject
-  }
 }
+
 
 
 

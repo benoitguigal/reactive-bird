@@ -11,7 +11,11 @@ version := "1.2-SNAPSHOT"
 
 scalaVersion := "2.10.3"
 
-resolvers += "spray repo" at "http://repo.spray.io"
+resolvers ++= {
+  Seq(
+    "spray repo" at "http://repo.spray.io",
+    "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/")
+}
 
 libraryDependencies ++= {
   val sprayV = "1.3.1"
@@ -25,7 +29,7 @@ libraryDependencies ++= {
     "io.spray"           % "spray-client"    % sprayV,
     "io.spray"           % "spray-can"       % sprayV,
     "io.spray"           % "spray-caching"   % sprayV,
-    "com.netflix.rxjava" % "rxjava-scala"    % "0.19.6",
+    "com.typesafe.play"  %% "play-iteratees" % "2.3.0",
     "io.spray"           %% "spray-json"     % "1.2.6",
     "org.scalatest"      % "scalatest_2.10"  % "2.1.3" % "test",
     "org.mockito"        % "mockito-core"    % "1.9.5" % "test")
