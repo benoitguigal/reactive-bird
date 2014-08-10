@@ -7,8 +7,6 @@ trait CanBeIdentified {
 
 case class UserId(id: Long) extends CanBeIdentified
 
-
-
 trait ResultSet[A] {
   val items: Seq[A]
 }

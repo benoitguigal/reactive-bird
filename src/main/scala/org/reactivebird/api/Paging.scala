@@ -40,13 +40,15 @@ trait Paging[A] {
 
 
   private[this] def concateneN(n: Int): Iteratee[Seq[A], Seq[A]] = {
-    def step(idx: Int, acc: Seq[A])(i: Input[Seq[A]]): Iteratee[Seq[A], Seq[A]] = i match {
-      case Input.EOF | Input.Empty => Done(acc, Input.EOF)
-      case Input.El(e) =>
-        if (idx < n)
-          Cont[Seq[A], Seq[A]](i => step(idx + e.size, acc ++ e)(i))
-        else
-          Done(acc.take(n), Input.EOF)
+    def step(idx: Int, acc: Seq[A])(i: Input[Seq[A]]): Iteratee[Seq[A], Seq[A]] = {
+      i match {
+        case Input.EOF | Input.Empty => Done(acc, Input.EOF)
+        case Input.El(e) =>
+          if (idx < n)
+            Cont[Seq[A], Seq[A]](i => step(idx + e.size, acc ++ e)(i))
+          else
+            Done(acc.take(n), Input.EOF)
+      }
     }
     Cont[Seq[A], Seq[A]](i => step(0, Seq.empty[A])(i))
   }
