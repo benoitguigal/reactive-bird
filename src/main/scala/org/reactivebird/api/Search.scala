@@ -27,8 +27,8 @@ trait Search {
       resultType map ("result_type" -> _),
       includeEntities map ("include_entities" -> _.toString),
       page.count map ("count" -> _.toString),
-      page.sinceId map ("since_id" -> _),
-      page.maxId map ("max_id" -> _)).flatten.toMap
+      page.sinceId map ("since_id" -> _.toString),
+      page.maxId map ("max_id" -> _.toString)).flatten.toMap
 
     get(s"/$version/search/tweets.json", params) map { r =>
       JsonParser(r.entity.asString).asJsObject.getFields("statuses") match {

@@ -2,14 +2,14 @@ package org.reactivebird.api
 
 import play.api.libs.iteratee._
 import scala.concurrent.Future
-import org.reactivebird.models.{ResultSet, ResultSetWithMaxId, ResultSetWithCursor, CanBeIdentified}
+import org.reactivebird.models.{ResultSetWithMaxId, ResultSetWithCursor, CanBeIdentified}
 import org.reactivebird.{Akka, TwitterErrorRateLimitExceeded}
 
 
 trait Page {
   val count: Option[Int]
 }
-case class MaxIdPage(count: Option[Int], sinceId: Option[String], maxId: Option[String]) extends Page
+case class MaxIdPage(count: Option[Int], sinceId: Option[Long], maxId: Option[Long]) extends Page
 case class CursorPage(count: Option[Int], cursor: Option[Long])
 
 
@@ -89,25 +89,22 @@ case class CursorPaging[A](pageable: CursorPage => Future[ResultSetWithCursor[A]
 
 }
 
-case class IdPaging[A <: CanBeIdentified](pageable: MaxIdPage => Future[ResultSetWithMaxId[A]], itemsPerPage: Int = 200, sinceId: Option[String] = None)
+case class IdPaging[A <: CanBeIdentified](pageable: MaxIdPage => Future[ResultSetWithMaxId[A]], itemsPerPage: Int = 200, sinceId: Option[Long] = None)
   extends Paging[A] {
 
   import Akka.exec
 
   private val seedPage = MaxIdPage(Some(itemsPerPage), sinceId, None)
   override val enumerator: Enumerator[Seq[A]] = Enumerator.unfoldM[MaxIdPage, Seq[A]](seedPage){ currentPage =>
-    currentPage match {
-      case MaxIdPage(_, Some(sinceId), Some(maxId)) if (sinceId >= maxId) => Future.successful[Option[(MaxIdPage, Seq[A])]]{ None }
-      case page =>
-        pageable(page) map { r =>
-          if (r.items.nonEmpty)
-            Some((MaxIdPage(Some(itemsPerPage), sinceId, Some(r.maxId.toString)), r.items))
-          else
-            Option.empty[(MaxIdPage, Seq[A])]
-        } recoverWith {
-          case e: TwitterErrorRateLimitExceeded => Future.successful[Option[(MaxIdPage, Seq[A])]]{ None }
-        }
+    pageable(currentPage) map { r =>
+      if (r.items.nonEmpty)
+        Some((MaxIdPage(Some(itemsPerPage), sinceId, Some(r.maxId)), r.items))
+      else
+        Option.empty[(MaxIdPage, Seq[A])]
+    } recoverWith {
+      case e: TwitterErrorRateLimitExceeded => Future.successful[Option[(MaxIdPage, Seq[A])]]{ None }
     }
+
   }
 }
 

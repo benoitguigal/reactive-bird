@@ -19,8 +19,8 @@ trait Timeline {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
-        page.sinceId map ("since_id" -> _),
-        page.maxId map ("max_id" -> _),
+        page.sinceId map ("since_id" -> _.toString),
+        page.maxId map ("max_id" -> _.toString),
         trimUser map ("trim_user" -> _.toString),
         contributorDetails map ("contributor_details" -> _.toString),
         includeEntities map ("include_entities" -> _.toString)
@@ -45,9 +45,9 @@ trait Timeline {
     val params = Seq(
         userId map ("user_id" -> _),
         screenName map ("screen_name" -> _),
-        page.sinceId map ("since_id" -> _),
+        page.sinceId map ("since_id" -> _.toString),
+        page.maxId map ("max_id" -> _.toString),
         page.count map ("count" -> _.toString),
-        page.maxId map ("max_id" -> _),
         trimUser map ("trim_user" -> _.toString),
         excludeReplies map ("exclude_replies" -> _.toString),
         contributorDetails map ("contributor_details" -> _.toString),
@@ -68,8 +68,8 @@ trait Timeline {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
-        page.sinceId map ("since_id" -> _),
-        page.maxId map ("max_id" -> _),
+        page.sinceId map ("since_id" -> _.toString),
+        page.maxId map ("max_id" -> _.toString),
         trimUser map ("trim_user" -> _.toString),
         excludeReplies map ("exclude_replies" -> _.toString),
         contributorDetails map ("contributor_details" -> _.toString),
@@ -89,8 +89,8 @@ trait Timeline {
 
     val params = Seq(
         page.count map ("count" -> _.toString),
-        page.sinceId map ("since_id" -> _),
-        page.maxId map ("max_id" -> _),
+        page.sinceId map ("since_id" -> _.toString),
+        page.maxId map ("max_id" -> _.toString),
         trimUser map ("trim_user" -> _.toString),
         includeEntities map ("include_entities" -> _.toString),
         includeUserEntities map ("include_user_entities" -> _.toString)

@@ -16,8 +16,8 @@ trait DirectMessages {
 
     val params = Seq(
       page.count map ("count" -> _.toString),
-      page.maxId map ("max_id" -> _),
-      page.sinceId map ("since_id" -> _),
+      page.maxId map ("max_id" -> _.toString),
+      page.sinceId map ("since_id" -> _.toString),
       includeEntities map ("include_entities" -> _.toString),
       skipStatus map ("skip_status" -> _.toString)).flatten.toMap
 
@@ -32,8 +32,8 @@ trait DirectMessages {
 
     val params = Seq(
       page.count map ("count" -> _.toString),
-      page.maxId map ("max_id" -> _),
-      page.sinceId map ("since_id" -> _),
+      page.maxId map ("max_id" -> _.toString),
+      page.sinceId map ("since_id" -> _.toString),
       includeEntities map ("include_entities" -> _.toString),
       skipStatus map ("skip_status" -> _.toString)).flatten.toMap
 

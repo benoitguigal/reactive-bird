@@ -18,8 +18,8 @@ trait Favorites {
       userId map ("user_id" -> _),
       screenName map ("screen_name" -> _),
       page.count map ("count" -> _.toString),
-      page.maxId map ("max_id" -> _),
-      page.sinceId map ("since_id" -> _),
+      page.maxId map ("max_id" -> _.toString),
+      page.sinceId map ("since_id" -> _.toString),
       includeEntities map ("include_entities" -> _.toString)).flatten.toMap
 
     get(s"/$version/favorites/list.json", params) map { r =>
