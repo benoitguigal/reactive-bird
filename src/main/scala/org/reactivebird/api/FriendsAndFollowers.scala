@@ -1,6 +1,6 @@
 package org.reactivebird.api
 
-import org.reactivebird.{Akka, version, TwitterApi}
+import org.reactivebird.{version, TwitterApi}
 import spray.json.{JsNumber, JsArray, JsonParser}
 import scala.concurrent.Future
 import org.reactivebird.models.{UserId, ResultSetWithCursor}
@@ -8,8 +8,6 @@ import org.reactivebird.models.{UserId, ResultSetWithCursor}
 
 trait FriendsAndFollowers {
   self: TwitterApi =>
-
-  import Akka.exec
 
   def friendsIds(
       userId: Option[String],

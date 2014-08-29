@@ -1,14 +1,12 @@
 package org.reactivebird.api
 
-import org.reactivebird.{Akka, TwitterApi, version}
+import org.reactivebird.{TwitterApi, version}
 import org.joda.time.DateTime
 import spray.json.{JsArray, DeserializationException, JsonParser}
 
 
 trait Search {
   self: TwitterApi =>
-
-  import Akka.exec
 
   def search(
       q: String,

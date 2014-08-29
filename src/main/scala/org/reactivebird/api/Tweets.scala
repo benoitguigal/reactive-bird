@@ -1,6 +1,6 @@
 package org.reactivebird.api
 
-import org.reactivebird.{TwitterApi, Akka}
+import org.reactivebird.TwitterApi
 import scala.concurrent.Future
 import spray.json.JsonParser
 import org.reactivebird.version
@@ -9,8 +9,6 @@ import org.reactivebird.%%
 
 trait Tweets {
   self: TwitterApi =>
-
-  import Akka.exec
 
   def retweets(id: String, count: Option[Int] = None, trimUser: Option[Boolean] = None): Future[Seq[Status]] = {
     val path = s"/$version/statuses/retweets/$id.json"

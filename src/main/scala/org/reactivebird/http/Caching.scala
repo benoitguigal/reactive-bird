@@ -3,12 +3,12 @@ package org.reactivebird.http
 import spray.caching.{LruCache, Cache}
 import spray.client.pipelining.SendReceive
 import spray.http.{HttpResponse, HttpMethods}
-import org.reactivebird.Akka.exec
+import scala.concurrent.ExecutionContext
 
 
 object Caching {
 
-  private[http] def withCache(cache: Cache[HttpResponse])(pipeline: SendReceive): SendReceive = {
+  private[http] def withCache(pipeline: SendReceive, cache: Cache[HttpResponse])(implicit exec: ExecutionContext): SendReceive = {
     request => {
       if (request.method == HttpMethods.GET)
         cache(request.uri.toString, () => pipeline(request))
@@ -23,13 +23,15 @@ trait Caching extends HttpService {
 
   import Caching._
 
-  private val cache: Cache[HttpResponse] = LruCache()
+  implicit val exec: ExecutionContext
+
+  val cache: Cache[HttpResponse] = LruCache()
   val cacheResult: Boolean
 
   override protected def getPipeline = {
     if (cacheResult) {
       super.getPipeline map { p =>
-        withCache(cache){ p }
+        withCache(p, cache)
       }
     } else {
       super.getPipeline

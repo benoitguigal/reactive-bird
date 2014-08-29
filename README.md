@@ -29,6 +29,7 @@ WARNING: Reactive Bird 1.1 has been reasonably tested but is not ready for produ
 ```scala
 val consumer = Consumer("your-consumer-key", "your-consumer-secret")
 val token = Token("your-token-key", "your-token-secret")
+implicit val system = ActorSystem() // or provide your own
 val twitterApi = new TwitterApi(consumer, token)
 val timeline: Future[Seq[Status]] = twitterApi.homeTimeline()
 ```

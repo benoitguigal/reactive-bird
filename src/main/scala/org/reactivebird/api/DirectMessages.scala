@@ -1,14 +1,12 @@
 package org.reactivebird.api
 
-import org.reactivebird.{Akka, TwitterApi}
+import org.reactivebird.TwitterApi
 import org.reactivebird.{version, %%}
 import spray.json.JsonParser
 
 
 trait DirectMessages {
  self: TwitterApi =>
-
-  import Akka.exec
 
   def directMessages(
       includeEntities: Option[Boolean] = None,

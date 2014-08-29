@@ -1,9 +1,10 @@
 package org.reactivebird.api
 
 import play.api.libs.iteratee._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import org.reactivebird.models.{ResultSetWithMaxId, ResultSetWithCursor, CanBeIdentified}
-import org.reactivebird.{Akka, TwitterErrorRateLimitExceeded}
+import org.reactivebird.TwitterErrorRateLimitExceeded
+import akka.actor.ActorSystem
 
 
 trait Page {
@@ -16,7 +17,8 @@ case class CursorPage(count: Option[Int], cursor: Option[Long])
 
 trait Paging[A] {
 
-  import Akka.exec
+  implicit val system: ActorSystem
+  implicit val exec = system.dispatcher
 
   val enumerator: Enumerator[Seq[A]]
 
@@ -69,9 +71,8 @@ trait Paging[A] {
 
 }
 
-case class CursorPaging[A](pageable: CursorPage => Future[ResultSetWithCursor[A]], itemsPerPage: Int = 2000) extends Paging[A] {
-
-  import Akka.exec
+case class CursorPaging[A](pageable: CursorPage => Future[ResultSetWithCursor[A]], itemsPerPage: Int = 2000)(implicit val system: ActorSystem)
+  extends Paging[A] {
 
   private val seedPage = CursorPage(Some(itemsPerPage), Some(-1))
   val enumerator: Enumerator[Seq[A]] = Enumerator.unfoldM[CursorPage, Seq[A]](seedPage){ currentPage =>
@@ -89,10 +90,12 @@ case class CursorPaging[A](pageable: CursorPage => Future[ResultSetWithCursor[A]
 
 }
 
-case class IdPaging[A <: CanBeIdentified](pageable: MaxIdPage => Future[ResultSetWithMaxId[A]], itemsPerPage: Int = 200, sinceId: Option[Long] = None)
+case class IdPaging[A <: CanBeIdentified](
+    pageable: MaxIdPage => Future[ResultSetWithMaxId[A]],
+    itemsPerPage: Int = 200,
+    sinceId: Option[Long] = None)(
+    implicit val system: ActorSystem)
   extends Paging[A] {
-
-  import Akka.exec
 
   private val seedPage = MaxIdPage(Some(itemsPerPage), sinceId, None)
   override val enumerator: Enumerator[Seq[A]] = Enumerator.unfoldM[MaxIdPage, Seq[A]](seedPage){ currentPage =>

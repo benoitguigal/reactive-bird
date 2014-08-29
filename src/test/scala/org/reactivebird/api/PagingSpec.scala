@@ -6,14 +6,15 @@ import org.reactivebird.models.{CanBeIdentified, ResultSetWithMaxId, ResultSetWi
 import scala.concurrent.{Await, Future}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.reactivebird.Akka
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import java.util.concurrent.TimeUnit
+import akka.actor.ActorSystem
 
 
 class CursorPagingSpec extends FlatSpec with Matchers with MockitoSugar {
 
-  import Akka.exec
+  implicit val system = ActorSystem()
 
   it should "get all items from the pages in the enumerator" in {
     val pageable = mock[CursorPage => Future[ResultSetWithCursor[Int]]]
@@ -72,7 +73,7 @@ class CursorPagingSpec extends FlatSpec with Matchers with MockitoSugar {
 
 class IdPagingSpec extends FlatSpec with Matchers with MockitoSugar {
 
-  import Akka.exec
+  implicit val system = ActorSystem()
 
   case class CanBeIdentifiedInt(n: Long) extends CanBeIdentified {
     override val id: Long = n

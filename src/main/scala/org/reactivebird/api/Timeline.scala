@@ -2,15 +2,13 @@ package org.reactivebird.api
 
 import spray.json.JsonParser
 import scala.concurrent.Future
-import org.reactivebird.{TwitterApi, Akka, version}
+import org.reactivebird.{TwitterApi, version}
 import org.reactivebird.models.{ResultSetWithMaxId}
 
 
 
 trait Timeline {
   self: TwitterApi =>
-
-  import Akka.exec
 
   def mentionsTimeline(
       trimUser: Option[Boolean] = None,

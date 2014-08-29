@@ -1,13 +1,11 @@
 package org.reactivebird.api
 
-import org.reactivebird.{Akka, TwitterApi, version}
+import org.reactivebird.{TwitterApi, version}
 import spray.json.JsonParser
 
 
 trait Favorites {
   self: TwitterApi =>
-
-  import Akka.exec
 
   def favoritesList(
       userId: Option[String] = None,

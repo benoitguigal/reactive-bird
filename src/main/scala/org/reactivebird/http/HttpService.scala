@@ -2,42 +2,45 @@ package org.reactivebird.http
 
 
 import spray.client.pipelining._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import spray.http._
 import spray.http.Uri.Query
 import spray.http.HttpResponse
 import spray.can.Http
 import akka.io.IO
-import org.reactivebird.Akka
 import org.reactivebird.host
 import akka.pattern.ask
 import org.reactivebird.TwitterError.errorFilter
+import akka.actor.ActorSystem
+import akka.util.Timeout
 
 
 trait HttpService {
 
-  import Akka.{system, exec, timeout}
+  implicit val system: ActorSystem
+  implicit val timeout: Timeout
+  implicit val exec : ExecutionContext
 
   lazy private val sendReceiveFut = for (
     Http.HostConnectorInfo(connector, _) <-
     IO(Http) ? Http.HostConnectorSetup(host, port = 443, sslEncryption = true)
   ) yield (sendReceive(connector))
 
-  protected def authorizer: RequestTransformer
-
-  protected def getPipeline = sendReceiveFut map { sendReceive =>
-    authorizer ~> sendReceive ~> errorFilter
-  }
+  protected def getPipeline = sendReceiveFut
 
   lazy private val pipeline = getPipeline
 
-  def get(path: String, params: Map[String, String]): Future[HttpResponse] = {
+  def get(path: String, params: Map[String, String])(
+    implicit pipeline: Future[SendReceive] = pipeline): Future[HttpResponse] = {
+
     val uri = Uri.from(path = path, query = Query(params))
     val request = Get(uri)
     pipeline.flatMap(_(request))
   }
 
-  def post(path: String, params: Map[String, String], content: Option[String] = None): Future[HttpResponse] = {
+  def post(path: String, params: Map[String, String], content: Option[String] = None)(
+    implicit pipeline: Future[SendReceive] = pipeline): Future[HttpResponse] = {
+
     val uri = Uri.from(path = path, query = Query(params))
     val request = {
       val baseRequest = Post(uri)

@@ -1,13 +1,11 @@
 package org.reactivebird.api
 
-import org.reactivebird.{TwitterApi, Akka}
+import org.reactivebird.TwitterApi
 import org.reactivebird.version
 import spray.json.{JsNumber, JsArray, JsonParser}
 
 trait Users {
   self: TwitterApi =>
-
-  import Akka.exec
 
   def accountSettings = {
     get(s"/$version/account/settings.json", Map()) map { r =>
