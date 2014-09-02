@@ -1,6 +1,6 @@
 package org.reactivebird.http
 
-import spray.caching.{LruCache, Cache}
+import spray.caching.Cache
 import spray.client.pipelining.SendReceive
 import spray.http.{HttpResponse, HttpMethods}
 import scala.concurrent.ExecutionContext
@@ -25,7 +25,7 @@ trait Caching extends HttpService {
 
   implicit val exec: ExecutionContext
 
-  private val cache: Cache[HttpResponse] = LruCache()
+  protected val cache: Cache[HttpResponse]
   protected val cacheResult: Boolean
 
   override protected def getPipeline = {
