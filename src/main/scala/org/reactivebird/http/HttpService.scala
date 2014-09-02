@@ -10,16 +10,17 @@ import spray.can.Http
 import akka.io.IO
 import org.reactivebird.host
 import akka.pattern.ask
-import org.reactivebird.TwitterError.errorFilter
 import akka.actor.ActorSystem
 import akka.util.Timeout
+import java.util.concurrent.TimeUnit
 
 
 trait HttpService {
 
   implicit val system: ActorSystem
-  implicit val timeout: Timeout
   implicit val exec : ExecutionContext
+
+  implicit private val timeout = Timeout(60, TimeUnit.SECONDS)
 
   lazy private val sendReceiveFut = for (
     Http.HostConnectorInfo(connector, _) <-

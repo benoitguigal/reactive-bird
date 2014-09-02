@@ -25,8 +25,8 @@ trait Caching extends HttpService {
 
   implicit val exec: ExecutionContext
 
-  val cache: Cache[HttpResponse] = LruCache()
-  val cacheResult: Boolean
+  private val cache: Cache[HttpResponse] = LruCache()
+  protected val cacheResult: Boolean
 
   override protected def getPipeline = {
     if (cacheResult) {

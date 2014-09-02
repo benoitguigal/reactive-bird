@@ -31,6 +31,7 @@ libraryDependencies ++= {
     "io.spray"           % "spray-caching"   % sprayV,
     "com.typesafe.play"  %% "play-iteratees" % "2.3.0",
     "io.spray"           %% "spray-json"     % "1.2.6",
+    "com.typesafe"       % "config"          % "1.2.1" ,
     "org.scalatest"      % "scalatest_2.10"  % "2.1.3" % "test",
     "org.mockito"        % "mockito-core"    % "1.9.5" % "test")
 }
