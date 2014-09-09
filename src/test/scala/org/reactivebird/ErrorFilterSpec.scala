@@ -9,7 +9,7 @@ import spray.http.HttpResponse
 
 class ErrorFilterSpec extends FunSpec with MockitoSugar with Matchers {
 
-   import TwitterError.errorFilter
+   import TwitterError.responseTransformer
 
    describe("errorFilter") {
 
@@ -18,7 +18,7 @@ class ErrorFilterSpec extends FunSpec with MockitoSugar with Matchers {
        val statusCode = mock[StatusCode]
        when(statusCode.intValue).thenReturn(200)
        when(response.status).thenReturn(statusCode)
-       errorFilter(response) should equal(response)
+       responseTransformer(response) should equal(response)
      }
 
      it("should throw exception with response body if Content-Type != application/json") {
@@ -31,7 +31,7 @@ class ErrorFilterSpec extends FunSpec with MockitoSugar with Matchers {
        when(response.status).thenReturn(statusCode)
        when(response.headers).thenReturn(List(HttpHeaders.`Content-Type`(ContentTypes.`text/plain`)))
        intercept[TwitterError] {
-         errorFilter(response)
+        responseTransformer(response)
        }
      }
 
@@ -45,7 +45,7 @@ class ErrorFilterSpec extends FunSpec with MockitoSugar with Matchers {
        when(entity.asString).thenReturn("""{"errors":[{"message":"Sorry, that page does not exist","code":34}]}""")
        when(response.entity).thenReturn(entity)
        intercept[TwitterErrorDoesNotExist] {
-         errorFilter(response)
+         responseTransformer(response)
        }
      }
    }

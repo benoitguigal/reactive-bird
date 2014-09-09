@@ -10,16 +10,18 @@ import spray.http.HttpResponse
 import spray.caching.LruCache
 import java.util.concurrent.TimeUnit.DAYS
 import scala.concurrent.duration.Duration
+import scala.concurrent.Future
+import spray.client.pipelining.SendReceive
+import ServiceFilter._
+import org.reactivebird.http.filters.{RetryFilter, CacheFilter}
+import spray.can.Http
 
 class TwitterApi(
     consumer: Consumer,
     token: Token)(
     implicit val system: ActorSystem)
-  extends HttpService
-  with StatusFiltering
-  with Retrying
-  with Caching
-  with Authorizing
+  extends ServiceProxy
+  with ServiceFactory
   with ModelFactory
   with Timeline
   with Tweets
@@ -30,14 +32,28 @@ class TwitterApi(
   with Favorites {
 
   private val config = ConfigFactory.load()
-  protected val cacheResult = config.getBoolean("reactivebird.cache-result")
-  protected val retryCount = config.getInt("reactivebird.retry-count")
+  private val cacheResult = config.getBoolean("reactivebird.cache-result")
+  private val retryCount = config.getInt("reactivebird.retry-count")
   private lazy val timeToLive = config.getDuration("reactivebird.time-to-live", DAYS)
 
-  implicit val exec = system.dispatcher
+  implicit val ec = system.dispatcher
 
-  protected val cache: Cache[HttpResponse] = LruCache(timeToLive = Duration(timeToLive, DAYS))
+  private val cache: Cache[HttpResponse] = LruCache(timeToLive = Duration(timeToLive, DAYS))
 
-  override protected def authorizer = Authorizer(consumer, token)
+  private val authorizer = Authorizer(consumer, token)
+
+  private val filters: Seq[ServiceFilter] = Seq(
+    ServiceFilter(authorizer, ResponseIdentity(_)),
+    ServiceFilter(RequestIdentity(_), TwitterError.responseTransformer),
+    new RetryFilter(retryCount),
+    new CacheFilter(cacheResult, cache))
+
+  private val setup = Http.HostConnectorSetup(host, port = 443, sslEncryption = true)
+
+  implicit val service: Future[SendReceive] = Service(setup) map { service =>
+    filters.foldRight(service) { (f, s) =>
+      f andThen s
+    }
+  }
 }
 

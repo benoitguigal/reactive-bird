@@ -1,7 +1,7 @@
 package org.reactivebird.api
 
 import play.api.libs.iteratee._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import org.reactivebird.models.{ResultSetWithMaxId, ResultSetWithCursor, CanBeIdentified}
 import org.reactivebird.TwitterErrorRateLimitExceeded
 import akka.actor.ActorSystem
@@ -18,7 +18,7 @@ case class CursorPage(count: Option[Int], cursor: Option[Long])
 trait Paging[A] {
 
   implicit val system: ActorSystem
-  implicit val exec = system.dispatcher
+  implicit val ec = system.dispatcher
 
   val enumerator: Enumerator[Seq[A]]
 

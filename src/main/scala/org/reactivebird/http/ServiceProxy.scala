@@ -15,32 +15,20 @@ import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 
 
-trait HttpService {
+trait ServiceProxy {
 
-  implicit val system: ActorSystem
-  implicit val exec : ExecutionContext
+  implicit val ec : ExecutionContext
 
-  implicit private val timeout = Timeout(60, TimeUnit.SECONDS)
+  implicit val service: Future[SendReceive]
 
-  lazy private val sendReceiveFut = for (
-    Http.HostConnectorInfo(connector, _) <-
-    IO(Http) ? Http.HostConnectorSetup(host, port = 443, sslEncryption = true)
-  ) yield (sendReceive(connector))
-
-  protected def getPipeline = sendReceiveFut
-
-  lazy private val pipeline = getPipeline
-
-  def get(path: String, params: Map[String, String])(
-    implicit pipeline: Future[SendReceive] = pipeline): Future[HttpResponse] = {
+  def get(path: String, params: Map[String, String]): Future[HttpResponse] = {
 
     val uri = Uri.from(path = path, query = Query(params))
     val request = Get(uri)
-    pipeline.flatMap(_(request))
+    service.flatMap(_(request))
   }
 
-  def post(path: String, params: Map[String, String], content: Option[String] = None)(
-    implicit pipeline: Future[SendReceive] = pipeline): Future[HttpResponse] = {
+  def post(path: String, params: Map[String, String], content: Option[String] = None): Future[HttpResponse] = {
 
     val uri = Uri.from(path = path, query = Query(params))
     val request = {
@@ -55,7 +43,6 @@ trait HttpService {
         baseRequest
       }
     }
-    pipeline.flatMap(_(request))
+    service.flatMap(_(request))
   }
-
 }

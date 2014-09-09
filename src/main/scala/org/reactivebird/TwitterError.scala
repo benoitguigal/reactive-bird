@@ -14,7 +14,7 @@ object TwitterError {
 
   import spray.client.pipelining._
 
-  def errorFilter: ResponseTransformer = {
+  def responseTransformer: ResponseTransformer = {
     response => {
       if (response.status.intValue == 200) {
         response
@@ -39,11 +39,11 @@ object TwitterError {
     }
   }
 
-  private def apply(_message: String) = new TwitterError {
+  def apply(_message: String) = new TwitterError {
     override val message: String = _message
   }
 
-  private def apply(code: Int, message: String): TwitterError = (code: @switch) match {
+  def apply(code: Int, message: String): TwitterError = (code: @switch) match {
     case 32     => new TwitterErrorCouldNotAuthenticate(message)
     case 34     => new TwitterErrorDoesNotExist(message)
     case 64     => new TwitterErrorAccountSuspended(message)

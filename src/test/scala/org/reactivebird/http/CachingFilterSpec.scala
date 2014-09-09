@@ -13,16 +13,16 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-class CachingSpec extends FlatSpec with MockitoSugar with Matchers {
+class CachingFilterSpec extends FlatSpec with MockitoSugar with Matchers {
 
-  import Caching._
 
   it should "cache HttpResponse" in {
     val pipeline = mock[SendReceive]
     val response = mock[HttpResponse]
     when(pipeline.apply(any[HttpRequest])).thenReturn(Future(response))
     val cache = LruCache[HttpResponse]()
-    val cachingPipeline = withCache(pipeline, cache)
+    val filter = new CachingFilter(true, cache)
+    val cachingPipeline = filter andThen pipeline
     val request = mock[HttpRequest]
     when(request.method).thenReturn(HttpMethods.GET)
     when(request.uri).thenReturn(Uri("https://api.twitter.com/1.1/search"))
@@ -38,7 +38,8 @@ class CachingSpec extends FlatSpec with MockitoSugar with Matchers {
     val response = mock[HttpResponse]
     when(pipeline.apply(any[HttpRequest])).thenReturn(Future(response))
     val cache = LruCache[HttpResponse]()
-    val cachingPipeline = withCache(pipeline, cache)
+    val filter = new CachingFilter(true, cache)
+    val cachingPipeline = filter andThen pipeline
     val request = mock[HttpRequest]
     when(request.method).thenReturn(HttpMethods.POST)
     when(request.uri).thenReturn(Uri("https://api.twitter.com/1.1/destroy"))
